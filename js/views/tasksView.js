@@ -418,7 +418,10 @@ export class TasksView {
         const id = btn.getAttribute('data-id');
         const updated = store.toggleTask(id);
         if (updated && updated.completed) {
-          firePaperConfetti(e.clientX, e.clientY, 20);
+          const stats = store.getTaskStats(store.getTodayString ? store.getTodayString() : new Date().toISOString().split('T')[0]);
+          if (stats.total > 0 && stats.remaining === 0) {
+            firePaperConfetti(e.clientX, e.clientY, 25);
+          }
           const row = btn.closest('.full-task-row');
           if (row) {
             row.classList.add('just-completed');

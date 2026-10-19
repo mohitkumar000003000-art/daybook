@@ -7,6 +7,10 @@
 
 export function attach3DTilt(elements) {
   if (!elements || elements.length === 0) return;
+  // Disable tilt on touch devices or if reduced motion is requested
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (prefersReduced || !canHover) return;
 
   elements.forEach(card => {
     card.addEventListener('mousemove', (e) => {
@@ -16,11 +20,11 @@ export function attach3DTilt(elements) {
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
 
-      // Calculate tilt degrees (subtle, max ~5deg)
-      const rotateX = ((centerY - y) / centerY) * 5;
-      const rotateY = ((x - centerX) / centerX) * 5;
+      // Calculate tilt degrees (subtle, max ~4deg)
+      const rotateX = ((centerY - y) / centerY) * 4;
+      const rotateY = ((x - centerX) / centerX) * 4;
 
-      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
     });
 
     card.addEventListener('mouseleave', () => {
@@ -54,8 +58,12 @@ export function attachButtonRipples(container = document) {
   });
 }
 
-export function animateNumberCounter(element, targetNumber, duration = 800, prefix = '', suffix = '') {
+export function animateNumberCounter(element, targetNumber, duration = 350, prefix = '', suffix = '') {
   if (!element) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    element.textContent = `${prefix}${targetNumber.toLocaleString()}${suffix}`;
+    return;
+  }
   const start = 0;
   const startTime = performance.now();
 

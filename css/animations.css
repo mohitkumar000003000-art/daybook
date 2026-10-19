@@ -1,9 +1,23 @@
 /* ====================================================
-   DAYBOOK ADVANCED ANIMATIONS & INTERACTIVE DYNAMICS
+   DAYBOOK REFINED MOTION SYSTEM
+   Calm, Warm Paper Journal Aesthetic with Restrained Motion
+   - Performance: uses transform and opacity only
+   - Durations: 150ms - 350ms for micro-interactions
+   - Easing: smooth cubic-bezier(0.16, 1, 0.3, 1) or ease-out
+   - Full prefers-reduced-motion compliance
+   - Hover states guarded by @media (hover: hover)
    ==================================================== */
 
+:root {
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-duration-fast: 160ms;
+  --motion-duration-normal: 240ms;
+  --motion-duration-enter: 320ms;
+}
+
 /* ----------------------------------------------------
-   1. AMBIENT BACKGROUND & GLOW EFFECTS
+   1. AMBIENT BACKGROUND SOFT GLOW
    ---------------------------------------------------- */
 body::before {
   content: '';
@@ -13,232 +27,183 @@ body::before {
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(158, 71, 42, 0.045) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(158, 71, 42, 0.035) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
-  animation: floatAmbient 18s ease-in-out infinite alternate;
+  animation: ambientWarmth 24s ease-in-out infinite alternate;
 }
 
 [data-theme="dark"] body::before {
-  background: radial-gradient(circle, rgba(222, 117, 82, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(222, 117, 82, 0.055) 0%, transparent 70%);
 }
 
-@keyframes floatAmbient {
+@keyframes ambientWarmth {
   0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-60px, 80px) scale(1.15); }
-  100% { transform: translate(40px, -40px) scale(0.95); }
+  50% { transform: translate(-40px, 50px) scale(1.08); }
+  100% { transform: translate(25px, -30px) scale(0.96); }
 }
 
 /* ----------------------------------------------------
-   2. VIEW TRANSITIONS & CASCADING ENTRANCES
+   2. VIEW TRANSITIONS & PAGE ENTRANCES
+   Gentle upward slide and fade-in
    ---------------------------------------------------- */
 @keyframes viewEntrance {
   0% {
     opacity: 0;
-    transform: translateY(22px) scale(0.99);
-    filter: blur(2px);
+    transform: translateY(12px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
+    transform: translateY(0);
   }
 }
 
 .view-content {
-  animation: viewEntrance 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: viewEntrance var(--motion-duration-enter) var(--motion-ease-out) forwards;
 }
 
-/* Staggered card cascading */
-.stat-card:nth-child(1) { animation: cardPopIn 450ms cubic-bezier(0.34, 1.3, 0.64, 1) 40ms both; }
-.stat-card:nth-child(2) { animation: cardPopIn 450ms cubic-bezier(0.34, 1.3, 0.64, 1) 90ms both; }
-.stat-card:nth-child(3) { animation: cardPopIn 450ms cubic-bezier(0.34, 1.3, 0.64, 1) 140ms both; }
-.stat-card:nth-child(4) { animation: cardPopIn 450ms cubic-bezier(0.34, 1.3, 0.64, 1) 190ms both; }
+/* Typography Page Heading Entrance: Calm fade-up */
+.page-title {
+  animation: headingReveal var(--motion-duration-enter) var(--motion-ease-out) both;
+}
 
-@keyframes cardPopIn {
+@keyframes headingReveal {
   0% {
     opacity: 0;
-    transform: translateY(20px) scale(0.94);
-  }
-  70% {
-    transform: translateY(-2px) scale(1.01);
+    transform: translateY(8px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
+  }
+}
+
+.card-eyebrow,
+.page-subtext {
+  transition: opacity var(--motion-duration-fast) ease, letter-spacing var(--motion-duration-fast) ease;
+}
+
+/* Staggered cards reveal with very small, subtle delays */
+.stat-card:nth-child(1) { animation: cardFadeUp 300ms var(--motion-ease-out) 30ms both; }
+.stat-card:nth-child(2) { animation: cardFadeUp 300ms var(--motion-ease-out) 60ms both; }
+.stat-card:nth-child(3) { animation: cardFadeUp 300ms var(--motion-ease-out) 90ms both; }
+.stat-card:nth-child(4) { animation: cardFadeUp 300ms var(--motion-ease-out) 120ms both; }
+
+@keyframes cardFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 .dashboard-grid .dashboard-col:nth-child(1) {
-  animation: viewEntrance 500ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+  animation: cardFadeUp 320ms var(--motion-ease-out) 80ms both;
 }
 
 .dashboard-grid .dashboard-col:nth-child(2) {
-  animation: viewEntrance 500ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
+  animation: cardFadeUp 320ms var(--motion-ease-out) 140ms both;
 }
 
 /* ----------------------------------------------------
-   3. GREETING WAVE & BRAND LOGO FLOAT
-   ---------------------------------------------------- */
-@keyframes waveHand {
-  0% { transform: rotate(0deg); }
-  15% { transform: rotate(16deg) scale(1.15); }
-  30% { transform: rotate(-12deg) scale(1.15); }
-  45% { transform: rotate(14deg); }
-  60% { transform: rotate(-6deg); }
-  75% { transform: rotate(8deg); }
-  100% { transform: rotate(0deg); }
-}
-
-.waving-hand {
-  display: inline-block;
-  transform-origin: 70% 70%;
-  animation: waveHand 1.6s ease-in-out 600ms;
-}
-
-.header-greeting:hover .waving-hand {
-  animation: waveHand 1.2s ease-in-out;
-}
-
-/* Brand icon hover float */
-.brand-logo-wrap {
-  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease;
-}
-
-.brand-header:hover .brand-logo-wrap {
-  transform: translateY(-3px) rotate(-6deg) scale(1.08);
-  box-shadow: 0 6px 16px rgba(158, 71, 42, 0.35);
-}
-
-/* ----------------------------------------------------
-   4. INTERACTIVE 3D CARD TILT & HOVER SHINE
+   3. DESKTOP CARDS HOVER ELEVATION (TOUCH-SAFE)
    ---------------------------------------------------- */
 .card,
 .stat-card,
 .journal-card,
 .quote-card {
-  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), 
-              box-shadow 260ms ease, 
-              border-color 260ms ease;
+  transition: transform var(--motion-duration-normal) var(--motion-ease-soft), 
+              box-shadow var(--motion-duration-normal) ease, 
+              border-color var(--motion-duration-normal) ease;
   position: relative;
   overflow: hidden;
 }
 
-.card:hover,
-.stat-card:hover,
-.journal-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(45, 35, 25, 0.08), 0 2px 6px rgba(45, 35, 25, 0.04);
-}
+@media (hover: hover) and (pointer: fine) {
+  .card:hover,
+  .stat-card:hover,
+  .journal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(45, 35, 25, 0.06), 0 2px 6px rgba(45, 35, 25, 0.03);
+  }
 
-[data-theme="dark"] .card:hover,
-[data-theme="dark"] .stat-card:hover,
-[data-theme="dark"] .journal-card:hover {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 3px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Subtle gloss shine reflection moving across cards on hover */
-.card::after,
-.stat-card::after,
-.journal-card::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    60deg, 
-    transparent 40%, 
-    rgba(255, 255, 255, 0.07) 50%, 
-    transparent 60%
-  );
-  transform: rotate(25deg) translateY(-100%);
-  transition: transform 700ms ease;
-  pointer-events: none;
-}
-
-.card:hover::after,
-.stat-card:hover::after,
-.journal-card:hover::after {
-  transform: rotate(25deg) translateY(100%);
+  [data-theme="dark"] .card:hover,
+  [data-theme="dark"] .stat-card:hover,
+  [data-theme="dark"] .journal-card:hover {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
 }
 
 /* ----------------------------------------------------
-   5. QUOTE BANNER PULSE & SHIMMER
+   4. QUOTE BANNER INTERACTIONS
    ---------------------------------------------------- */
 .quote-card {
   border-left-width: 4px;
-  transition: transform 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
 }
 
-.quote-card:hover {
-  transform: translateY(-2px);
-  border-left-color: var(--accent-hover);
-  box-shadow: 0 6px 20px rgba(158, 71, 42, 0.12);
-}
-
-.quote-mark {
-  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms ease;
-}
-
-.quote-card:hover .quote-mark {
-  transform: scale(1.2) rotate(-8deg);
-  opacity: 0.95;
-}
-
-@keyframes spinRefresh {
-  0% { transform: rotate(0deg) scale(1); }
-  40% { transform: rotate(180deg) scale(1.3); }
-  80% { transform: rotate(340deg) scale(0.95); }
-  100% { transform: rotate(360deg) scale(1); }
+@media (hover: hover) and (pointer: fine) {
+  .quote-card:hover {
+    transform: translateY(-2px);
+    border-left-color: var(--accent-hover);
+    box-shadow: 0 4px 14px rgba(158, 71, 42, 0.08);
+  }
 }
 
 .quote-refresh-btn.spinning {
-  animation: spinRefresh 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: spinRefresh 450ms var(--motion-ease-out);
 }
 
-@keyframes quoteFade {
-  0% { opacity: 0; transform: translateY(-8px) scale(0.98); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes spinRefresh {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .quote-text.animate-fade {
-  animation: quoteFade 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: quoteFade 280ms var(--motion-ease-out);
+}
+
+@keyframes quoteFade {
+  0% { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* ----------------------------------------------------
-   6. TASK CHECKBOX & SPARKLE EXPLOSION
+   5. TASK CHECKBOX & STRIKE-THROUGH
+   Smooth, understated transitions
    ---------------------------------------------------- */
-@keyframes checkSpring {
-  0% { transform: scale(0.4) rotate(-20deg); }
-  45% { transform: scale(1.35) rotate(10deg); }
-  75% { transform: scale(0.9) rotate(-3deg); }
-  100% { transform: scale(1) rotate(0deg); }
-}
-
 .task-checkbox-btn {
-  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), 
-              background-color 220ms ease, 
-              border-color 220ms ease, 
-              box-shadow 220ms ease;
+  transition: transform 160ms var(--motion-ease-out), 
+              background-color 200ms ease, 
+              border-color 200ms ease, 
+              box-shadow 200ms ease;
 }
 
-.task-checkbox-btn:hover {
-  transform: scale(1.15);
-  box-shadow: 0 2px 8px rgba(158, 71, 42, 0.2);
+@media (hover: hover) and (pointer: fine) {
+  .task-checkbox-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 6px rgba(158, 71, 42, 0.15);
+  }
 }
 
 .task-checkbox-btn:active {
-  transform: scale(0.85);
+  transform: scale(0.92);
 }
 
 .task-checkbox-btn.checked {
-  animation: checkSpring 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: checkboxPop 240ms var(--motion-ease-out) forwards;
+}
+
+@keyframes checkboxPop {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 .task-checkbox-btn.checked svg {
-  animation: checkmarkDraw 260ms ease-out forwards;
+  animation: checkmarkDraw 200ms ease-out forwards;
 }
 
 @keyframes checkmarkDraw {
@@ -252,334 +217,170 @@ body::before {
   }
 }
 
-/* Task row hover slide */
+/* Task row hover & completion transitions */
 .task-row,
 .full-task-row {
-  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), 
-              background-color 200ms ease, 
-              border-color 200ms ease, 
-              box-shadow 200ms ease;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out), 
+              background-color var(--motion-duration-fast) ease, 
+              border-color var(--motion-duration-fast) ease, 
+              box-shadow var(--motion-duration-fast) ease;
 }
 
-.task-row:hover,
-.full-task-row:hover {
-  transform: translateX(4px);
-  border-color: var(--border-strong);
-}
-
-@keyframes taskCompletedFlash {
-  0% {
-    background-color: var(--accent-subtle);
-    transform: scale(1.01) translateX(4px);
-  }
-  50% {
-    background-color: var(--accent-subtle);
-  }
-  100% {
-    background-color: var(--bg-surface);
-    transform: scale(1) translateX(0);
+@media (hover: hover) and (pointer: fine) {
+  .task-row:hover,
+  .full-task-row:hover {
+    transform: translateX(3px);
+    border-color: var(--border-strong);
   }
 }
 
 .task-row.just-completed,
 .full-task-row.just-completed {
-  animation: taskCompletedFlash 650ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: taskCompletedWarm 350ms var(--motion-ease-out);
 }
 
-/* Strikethrough sweep line */
+@keyframes taskCompletedWarm {
+  0% {
+    background-color: var(--accent-subtle);
+  }
+  100% {
+    background-color: var(--bg-surface);
+  }
+}
+
+/* Calm Strikethrough */
 .task-row.completed .task-title,
 .full-task-row.completed .task-title,
 .mit-item.completed .mit-text,
 .plan-mit-row.completed .mit-label {
   text-decoration: line-through;
   color: var(--text-muted);
-  transition: color 250ms ease, opacity 250ms ease;
+  opacity: 0.75;
+  transition: color 200ms ease, opacity 200ms ease;
 }
 
 /* ----------------------------------------------------
-   7. THE RULE OF 3 (MIT) INTERACTION
+   6. THE RULE OF 3 (MIT) INTERACTION
    ---------------------------------------------------- */
 .mit-item,
 .plan-mit-row {
-  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), 
-              border-color 220ms ease, 
-              box-shadow 220ms ease;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out), 
+              border-color var(--motion-duration-fast) ease, 
+              box-shadow var(--motion-duration-fast) ease;
 }
 
-.mit-item:hover,
-.plan-mit-row:hover {
-  transform: translateX(5px) scale(1.005);
-  box-shadow: 0 4px 12px rgba(45, 35, 25, 0.05);
-  border-color: var(--accent-border);
-}
-
-.mit-number,
-.mit-rank {
-  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.mit-item:hover .mit-number,
-.plan-mit-row:hover .mit-rank {
-  transform: scale(1.25);
-  color: var(--accent-hover);
+@media (hover: hover) and (pointer: fine) {
+  .mit-item:hover,
+  .plan-mit-row:hover {
+    transform: translateX(3px);
+    box-shadow: 0 3px 10px rgba(45, 35, 25, 0.04);
+    border-color: var(--accent-border);
+  }
 }
 
 /* ----------------------------------------------------
-   8. BUTTONS TACTILE FEEDBACK & GLOW
+   7. BUTTONS TACTILE FEEDBACK & ACTIVE STATES
    ---------------------------------------------------- */
 .btn {
   position: relative;
   overflow: hidden;
-  transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1), 
-              box-shadow 200ms ease, 
-              background-color 200ms ease, 
-              border-color 200ms ease;
+  transition: transform 140ms var(--motion-ease-soft), 
+              box-shadow 180ms ease, 
+              background-color 180ms ease, 
+              border-color 180ms ease;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(158, 71, 42, 0.25);
+  }
+  [data-theme="dark"] .btn-primary:hover {
+    box-shadow: 0 4px 14px rgba(222, 117, 82, 0.35);
+  }
 }
 
 .btn:active {
-  transform: scale(0.95) translateY(1px);
+  transform: scale(0.97);
 }
 
-.btn-primary {
-  box-shadow: 0 2px 6px rgba(158, 71, 42, 0.2);
-}
-
-.btn-primary:hover {
-  box-shadow: 0 6px 18px rgba(158, 71, 42, 0.35);
-}
-
-[data-theme="dark"] .btn-primary:hover {
-  box-shadow: 0 6px 20px rgba(222, 117, 82, 0.45);
-}
-
-/* Sidebar quick buttons subtle breathing glow */
-.sidebar-action-btn.btn-primary {
-  animation: primaryBtnPulse 5s ease-in-out infinite;
-}
-
-@keyframes primaryBtnPulse {
-  0%, 100% {
-    box-shadow: 0 2px 8px rgba(158, 71, 42, 0.18);
-  }
-  50% {
-    box-shadow: 0 4px 16px rgba(158, 71, 42, 0.4);
-  }
-}
-
-/* Ripple click effect */
+/* Subtle click ripple */
 .ripple-wave {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.3);
   transform: scale(0);
-  animation: rippleAnimation 550ms ease-out;
+  animation: rippleAnimation 400ms ease-out forwards;
   pointer-events: none;
 }
 
 @keyframes rippleAnimation {
   to {
-    transform: scale(3.5);
+    transform: scale(3);
     opacity: 0;
   }
 }
 
 /* ----------------------------------------------------
-   9. STREAK GLOW & FLAME PULSE
-   ---------------------------------------------------- */
-@keyframes flameBreathing {
-  0%, 100% {
-    transform: scale(1);
-    filter: drop-shadow(0 0 2px rgba(158, 71, 42, 0.2));
-  }
-  50% {
-    transform: scale(1.08);
-    filter: drop-shadow(0 0 10px rgba(222, 117, 82, 0.5));
-  }
-}
-
-.stat-card:nth-child(3) .stat-value {
-  display: inline-block;
-  animation: flameBreathing 3.2s ease-in-out infinite;
-}
-
-/* ----------------------------------------------------
-   10. PROGRESS BARS FLUID LIQUID GLIMMER
+   8. PROGRESS BARS LIQUID TRANSITION
    ---------------------------------------------------- */
 .progress-bar-fill {
-  transition: width 800ms cubic-bezier(0.34, 1.25, 0.64, 1);
+  transition: width 450ms var(--motion-ease-out);
   position: relative;
   overflow: hidden;
 }
 
-.progress-bar-fill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
-    transparent 100%
-  );
-  transform: translateX(-100%);
-  animation: progressGlimmer 2.2s infinite;
-}
-
-@keyframes progressGlimmer {
-  0% { transform: translateX(-100%); }
-  45%, 100% { transform: translateX(100%); }
-}
-
 /* ----------------------------------------------------
-   11. SVG CHART BARS & SMOOTH LINE DRAWING
-   ---------------------------------------------------- */
-.daybook-svg-chart .chart-bar {
-  transform-origin: bottom;
-  animation: chartBarRise 750ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
-}
-
-@keyframes chartBarRise {
-  0% {
-    transform: scaleY(0);
-    opacity: 0;
-  }
-  60% {
-    transform: scaleY(1.06);
-  }
-  100% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-}
-
-.daybook-svg-chart path[stroke="var(--accent)"] {
-  stroke-dasharray: 1200;
-  stroke-dashoffset: 1200;
-  animation: drawChartSmooth 1.3s cubic-bezier(0.16, 1, 0.3, 1) 200ms forwards;
-}
-
-@keyframes drawChartSmooth {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.daybook-svg-chart circle {
-  animation: popInNode 450ms cubic-bezier(0.34, 1.56, 0.64, 1) 750ms both;
-}
-
-@keyframes popInNode {
-  0% {
-    opacity: 0;
-    transform: scale(0);
-  }
-  70% {
-    transform: scale(1.4);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* ----------------------------------------------------
-   12. CALENDAR CELLS HOVER POP & SELECTION WAVE
+   9. CALENDAR CELLS HOVER & SELECTION
    ---------------------------------------------------- */
 .cal-day-cell {
-  transition: transform 200ms cubic-bezier(0.34, 1.4, 0.64, 1), 
-              border-color 200ms ease, 
-              background-color 200ms ease, 
-              box-shadow 200ms ease;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out), 
+              border-color var(--motion-duration-fast) ease, 
+              background-color var(--motion-duration-fast) ease, 
+              box-shadow var(--motion-duration-fast) ease;
 }
 
-.cal-day-cell:hover:not(.cal-day-outside) {
-  transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 4px 14px rgba(45, 35, 25, 0.08);
-  border-color: var(--border-strong);
-  z-index: 2;
+@media (hover: hover) and (pointer: fine) {
+  .cal-day-cell:hover:not(.cal-day-outside) {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(45, 35, 25, 0.06);
+    border-color: var(--border-strong);
+    z-index: 2;
+  }
 }
 
 .cal-day-cell.cal-day-selected {
-  animation: calendarCellSelect 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: calendarCellSelect 220ms var(--motion-ease-out);
 }
 
 @keyframes calendarCellSelect {
-  0% { transform: scale(0.9); }
-  50% { transform: scale(1.08); }
+  0% { transform: scale(0.94); }
+  60% { transform: scale(1.04); }
   100% { transform: scale(1); }
 }
 
-.cal-indicator-chip {
-  transition: transform 180ms ease;
-}
-
-.cal-day-cell:hover .cal-indicator-chip {
-  transform: scale(1.08);
-}
-
 /* ----------------------------------------------------
-   13. JOURNAL TIMELINE CARDS ENTRANCE & HOVER
+   10. JOURNAL TIMELINE CARDS ENTRANCE
    ---------------------------------------------------- */
 .journal-card {
-  animation: cardPopIn 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: cardFadeUp 300ms var(--motion-ease-out) both;
 }
 
-.journal-card:nth-child(1) { animation-delay: 40ms; }
-.journal-card:nth-child(2) { animation-delay: 90ms; }
-.journal-card:nth-child(3) { animation-delay: 140ms; }
-.journal-card:nth-child(4) { animation-delay: 190ms; }
-.journal-card:nth-child(5) { animation-delay: 240ms; }
-.journal-card:nth-child(6) { animation-delay: 290ms; }
-
-.journal-card:hover .journal-card-thumbnail {
-  transform: scale(1.03);
-}
-
-.journal-card-thumbnail {
-  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.journal-card-img-wrap {
-  overflow: hidden;
-  border-radius: var(--radius-sm);
-}
+.journal-card:nth-child(1) { animation-delay: 30ms; }
+.journal-card:nth-child(2) { animation-delay: 60ms; }
+.journal-card:nth-child(3) { animation-delay: 90ms; }
+.journal-card:nth-child(4) { animation-delay: 120ms; }
 
 /* ----------------------------------------------------
-   14. REFLECTION PROMPT CHIPS BOUNCE & GLOW
-   ---------------------------------------------------- */
-.prompt-chip {
-  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), 
-              background-color 180ms ease, 
-              border-color 180ms ease, 
-              color 180ms ease, 
-              box-shadow 180ms ease;
-}
-
-.prompt-chip:hover {
-  transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 4px 12px rgba(158, 71, 42, 0.15);
-  border-color: var(--accent);
-}
-
-.prompt-chip:active {
-  transform: scale(0.94);
-}
-
-/* ----------------------------------------------------
-   15. SIDEBAR NAVIGATION HOVER & ACTIVE SLIDE
+   11. SIDEBAR & NAVIGATION TRANSITIONS
    ---------------------------------------------------- */
 .sidebar-nav-btn {
   position: relative;
-  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), 
-              background-color 200ms ease, 
-              color 200ms ease;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out), 
+              background-color var(--motion-duration-fast) ease, 
+              color var(--motion-duration-fast) ease;
 }
 
 .sidebar-nav-btn::before {
@@ -588,40 +389,26 @@ body::before {
   left: 0;
   top: 50%;
   transform: translateY(-50%) scaleY(0);
-  width: 4px;
-  height: 65%;
+  width: 3px;
+  height: 60%;
   background: var(--accent);
-  border-radius: 0 4px 4px 0;
-  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 0 3px 3px 0;
+  transition: transform 200ms var(--motion-ease-out);
 }
 
 .sidebar-nav-btn.active::before {
   transform: translateY(-50%) scaleY(1);
 }
 
-.sidebar-nav-btn:hover {
-  transform: translateX(5px);
-}
-
-.sidebar-nav-btn:hover .nav-icon {
-  transform: scale(1.15) rotate(4deg);
-}
-
-.nav-icon {
-  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Theme toggle button spin */
-.theme-toggle-btn {
-  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 200ms ease;
-}
-
-.theme-toggle-btn:hover {
-  transform: rotate(30deg) scale(1.12);
+@media (hover: hover) and (pointer: fine) {
+  .sidebar-nav-btn:hover {
+    transform: translateX(3px);
+  }
 }
 
 /* ----------------------------------------------------
-   16. CELEBRATION PARTICLE CANNON
+   12. CELEBRATION PARTICLE CANNON
+   (Only for 100% daily tasks completed)
    ---------------------------------------------------- */
 .celebration-particle-container {
   position: fixed;
@@ -636,108 +423,63 @@ body::before {
 
 .paper-confetti {
   position: absolute;
-  width: 8px;
-  height: 14px;
+  width: 7px;
+  height: 12px;
   opacity: 1;
   border-radius: 2px;
-  animation: confettiExplode 1.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  animation: confettiExplode 1.1s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
 }
 
 @keyframes confettiExplode {
   0% {
     opacity: 1;
-    transform: translate(0, 0) rotate(0deg) scale(1.2);
+    transform: translate(0, 0) rotate(0deg) scale(1);
   }
   60% {
     opacity: 0.9;
   }
   100% {
     opacity: 0;
-    transform: translate(var(--deltaX, 30px), var(--deltaY, 160px)) rotate(var(--rot, 540deg)) scale(0.4);
-  }
-}
-
-/* Sparkle stars */
-.sparkle-star {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  animation: sparkleFloat 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-@keyframes sparkleFloat {
-  0% {
-    opacity: 1;
-    transform: translate(0, 0) scale(0.3) rotate(0deg);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(var(--deltaX), var(--deltaY)) scale(1.4) rotate(180deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(var(--deltaX), calc(var(--deltaY) + 40px)) scale(0.2) rotate(360deg);
+    transform: translate(var(--deltaX, 25px), var(--deltaY, 130px)) rotate(var(--rot, 360deg)) scale(0.35);
   }
 }
 
 /* ----------------------------------------------------
-   17. NUMBER COUNTER ANIMATION EFFECT
+   13. MOBILE-FIRST FLUID MOTION & DYNAMICS
    ---------------------------------------------------- */
-.stat-value {
-  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.stat-card:hover .stat-value {
-  transform: scale(1.06);
-}
-
-/* ====================================================
-   18. MOBILE-FIRST FLUID MOTION & DYNAMIC APP FEEL
-   ==================================================== */
-
-/* Smooth spring active press on all cards, buttons, and navigation items */
-.btn:active,
-.mobile-nav-item:active,
-.stat-card:active,
-.card:active,
-.task-row:active,
-.mit-item:active,
-.action-btn:active {
-  transform: scale(0.968) !important;
-  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.4, 1) !important;
-}
-
-/* Quick Add button glowing aura and heartbeat spring */
-@keyframes quickPulse {
-  0% {
-    box-shadow: 0 4px 14px rgba(158, 71, 42, 0.4), 0 0 0 0 rgba(158, 71, 42, 0.35);
+@media (max-width: 900px) {
+  /* Fast, non-blocking page transitions on mobile */
+  .view-content {
+    animation: mobileSlideUp 260ms var(--motion-ease-out) forwards;
   }
-  70% {
-    box-shadow: 0 6px 20px rgba(158, 71, 42, 0.5), 0 0 0 10px rgba(158, 71, 42, 0);
+
+  @keyframes mobileSlideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  100% {
-    box-shadow: 0 4px 14px rgba(158, 71, 42, 0.4), 0 0 0 0 rgba(158, 71, 42, 0);
+
+  /* Remove staggered delays on phones to ensure immediate responsiveness */
+  .stat-card,
+  .journal-card,
+  .dashboard-grid .dashboard-col {
+    animation-delay: 0ms !important;
   }
 }
 
-.m-nav-quick-plus {
-  animation: quickPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.mobile-nav-quick-add:active .m-nav-quick-plus {
-  transform: scale(0.88) rotate(45deg);
-}
-
-/* Mobile Bottom Navigation active bounce & icon float */
+/* Mobile Bottom Navigation active indicator */
 .mobile-nav-item {
   position: relative;
   overflow: hidden;
 }
 
 .mobile-nav-item.active .m-nav-icon {
-  animation: navBounce 380ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: navBounce 280ms var(--motion-ease-out) forwards;
   color: var(--accent);
 }
 
@@ -745,119 +487,50 @@ body::before {
   content: '';
   position: absolute;
   bottom: 4px;
-  width: 14px;
+  width: 12px;
   height: 3px;
   background: var(--accent);
   border-radius: var(--radius-full);
-  animation: pillSlide 240ms ease-out forwards;
+  animation: pillSlide 200ms ease-out forwards;
 }
 
 @keyframes navBounce {
   0% { transform: translateY(0) scale(1); }
-  45% { transform: translateY(-4px) scale(1.18); }
-  100% { transform: translateY(-1px) scale(1.08); }
+  50% { transform: translateY(-3px) scale(1.12); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 @keyframes pillSlide {
   from { width: 0; opacity: 0; }
-  to { width: 14px; opacity: 1; }
+  to { width: 12px; opacity: 1; }
 }
 
-/* Card shimmer on scroll into view */
-.card,
-.stat-card,
-.quote-card {
-  position: relative;
-  overflow: hidden;
+/* Mobile Quick Plus Button - calm press feedback */
+.mobile-nav-quick-add:active .m-nav-quick-plus {
+  transform: scale(0.92);
+  transition: transform 120ms ease;
 }
 
-.card::before,
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -120%;
-  width: 70%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.14) 50%,
-    transparent 100%
-  );
-  transform: skewX(-20deg);
-  pointer-events: none;
-  animation: subtleShimmer 9s infinite 2s ease-in-out;
-}
-
-[data-theme="dark"] .card::before,
-[data-theme="dark"] .stat-card::before {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 100%
-  );
-}
-
-@keyframes subtleShimmer {
-  0% { left: -120%; }
-  18% { left: 160%; }
-  100% { left: 160%; }
-}
-
-/* Checkbox celebratory pop on completion */
-.task-checkbox-btn {
-  transition: transform 220ms cubic-bezier(0.34, 1.6, 0.64, 1), background-color 180ms ease, border-color 180ms ease;
-}
-
-.task-checkbox-btn:active {
-  transform: scale(0.85);
-}
-
-.task-checkbox-btn.checked {
-  animation: checkboxPop 350ms cubic-bezier(0.34, 1.6, 0.64, 1) forwards;
-}
-
-@keyframes checkboxPop {
-  0% { transform: scale(0.8); }
-  50% { transform: scale(1.22); }
-  100% { transform: scale(1); }
-}
-
-/* Smooth staggering in lists on mobile */
-.mit-item {
-  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 220ms ease;
-}
-
-.mit-item:hover,
-.mit-item:focus-within {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(45, 35, 25, 0.06);
-}
-
-/* Floating subtle animation for quote cards */
-.quote-card {
-  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 280ms ease;
-}
-
-.quote-card:active {
-  transform: scale(0.985);
-}
-
-/* Page fade-in-up transition */
-.view-content {
-  animation: mobileSlideUp 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes mobileSlideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(16px);
+/* ----------------------------------------------------
+   14. ACCESSIBILITY: PREFERS-REDUCED-MOTION
+   Strictly respect users' preferences by disabling decorative motion
+   ---------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+
+  body::before {
+    display: none !important;
+  }
+
+  .celebration-particle-container {
+    display: none !important;
   }
 }
 

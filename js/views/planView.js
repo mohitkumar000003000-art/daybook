@@ -217,13 +217,16 @@ export class PlanView {
         const plan = store.getDailyPlan(this.currentDateStr);
         if (plan && plan.topThree && plan.topThree[idx]) {
           plan.topThree[idx].completed = !plan.topThree[idx].completed;
-          if (plan.topThree[idx].completed) {
-            firePaperConfetti(e.clientX, e.clientY, 24);
-          }
           if (plan.topThree[idx].taskId) {
             store.toggleTask(plan.topThree[idx].taskId);
           }
           store.saveDailyPlan(this.currentDateStr, { topThree: plan.topThree });
+          if (plan.topThree[idx].completed) {
+            const stats = store.getTaskStats(this.currentDateStr);
+            if (stats.total > 0 && stats.remaining === 0) {
+              firePaperConfetti(e.clientX, e.clientY, 25);
+            }
+          }
           this.render();
         }
       });

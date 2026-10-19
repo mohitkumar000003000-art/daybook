@@ -363,19 +363,22 @@ export class DashboardView {
       setTimeout(() => refreshBtn.classList.remove('spinning'), 550);
     });
 
-    // Task checkbox toggle with celebration confetti
+    // Task checkbox toggle with celebration only when all daily tasks are completed
     this.container.querySelectorAll('[data-action="toggle-task"]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const id = btn.getAttribute('data-id');
         const updated = store.toggleTask(id);
         if (updated && updated.completed) {
-          firePaperConfetti(e.clientX, e.clientY, 18);
+          const stats = store.getTaskStats(getTodayString());
+          if (stats.total > 0 && stats.remaining === 0) {
+            firePaperConfetti(e.clientX, e.clientY, 25);
+          }
         }
       });
     });
 
-    // Top 3 MIT toggle with celebration confetti
+    // Top 3 MIT toggle with celebration only when all daily tasks are completed
     this.container.querySelectorAll('[data-action="toggle-mit"]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -384,13 +387,16 @@ export class DashboardView {
         const plan = store.getDailyPlan(todayStr);
         if (plan && plan.topThree && plan.topThree[idx]) {
           plan.topThree[idx].completed = !plan.topThree[idx].completed;
-          if (plan.topThree[idx].completed) {
-            firePaperConfetti(e.clientX, e.clientY, 24);
-          }
           if (plan.topThree[idx].taskId) {
             store.toggleTask(plan.topThree[idx].taskId);
           }
           store.saveDailyPlan(todayStr, { topThree: plan.topThree });
+          if (plan.topThree[idx].completed) {
+            const stats = store.getTaskStats(todayStr);
+            if (stats.total > 0 && stats.remaining === 0) {
+              firePaperConfetti(e.clientX, e.clientY, 25);
+            }
+          }
         }
       });
     });
@@ -405,15 +411,15 @@ export class DashboardView {
       });
     });
 
-    // Animate stats number roll-up
+    // Animate stats number roll-up with short, snappy durations
     const todayStr = getTodayString();
     const taskStats = store.getTaskStats(todayStr);
     const writingStats = store.getWritingStats();
 
-    animateNumberCounter(this.container.querySelector('#dash-stat-pct'), taskStats.percentage, 750, '', '%');
-    animateNumberCounter(this.container.querySelector('#dash-stat-rem'), taskStats.remaining, 600);
-    animateNumberCounter(this.container.querySelector('#dash-stat-streak'), writingStats.currentStreak, 700);
-    animateNumberCounter(this.container.querySelector('#dash-stat-words'), writingStats.totalWords, 850);
+    animateNumberCounter(this.container.querySelector('#dash-stat-pct'), taskStats.percentage, 320, '', '%');
+    animateNumberCounter(this.container.querySelector('#dash-stat-rem'), taskStats.remaining, 280);
+    animateNumberCounter(this.container.querySelector('#dash-stat-streak'), writingStats.currentStreak, 300);
+    animateNumberCounter(this.container.querySelector('#dash-stat-words'), writingStats.totalWords, 350);
 
     // Attach 3D tilt on cards and click ripples
     attach3DTilt(this.container.querySelectorAll('.stat-card, .quote-card, .latest-entry-card, .mit-item'));
