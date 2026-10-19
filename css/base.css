@@ -316,21 +316,42 @@ a:hover {
 }
 
 /* ----------------------------------------------------
-   HIDE INJECTED PLATFORM BADGES (Netlify badge)
+   HIDE INJECTED PLATFORM BADGES (Netlify badge / drawer)
    ---------------------------------------------------- */
+iframe,
+iframe[src*="netlify"],
+iframe[id*="netlify"],
+iframe[class*="netlify"],
+netlify-drawer,
 #nl-badge,
 .nl-badge,
-[aria-label*="Powered by Netlify"],
-[id*="netlify"],
-[class*="netlify-badge"] {
+#netlify-badge,
+.netlify-badge,
+[data-netlify-deploy-id],
+[aria-label*="Netlify" i],
+[aria-label*="Powered by Netlify" i],
+[id*="netlify" i],
+[class*="netlify" i],
+[class*="netlify-badge"],
+div[style*="z-index: 10000"],
+div[style*="z-index: 99999"],
+div[style*="z-index: 2147483647"],
+div[style*="z-index: 2147483646"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
   width: 0 !important;
   height: 0 !important;
-  position: absolute !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  position: fixed !important;
+  bottom: -9999px !important;
+  right: -9999px !important;
+  left: -9999px !important;
   clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(100%) !important;
+  transform: scale(0) !important;
 }
 
 

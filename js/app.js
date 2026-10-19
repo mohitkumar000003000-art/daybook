@@ -400,44 +400,52 @@ class App {
 
   suppressPlatformBadges() {
     const purge = () => {
-      // 1. Remove standard and custom Netlify elements
+      // 1. Remove standard and custom Netlify elements and any injected iframes
       const selectors = [
+        'iframe',
         'netlify-drawer',
         '#nl-badge',
         '.nl-badge',
         '#netlify-badge',
         '.netlify-badge',
         '[data-netlify-deploy-id]',
-        '[aria-label*="Netlify"]',
-        '[class*="netlify"]',
-        '[id*="netlify"]'
+        '[aria-label*="Netlify" i]',
+        '[aria-label*="Powered by Netlify" i]',
+        '[class*="netlify" i]',
+        '[id*="netlify" i]'
       ];
 
-      document.querySelectorAll(selectors.join(', ')).forEach(el => el.remove());
+      document.querySelectorAll(selectors.join(', ')).forEach(el => {
+        try { el.remove(); } catch (e) {}
+      });
 
-      // 2. Scan all bottom-right positioned anchors or buttons with text or links related to Netlify
-      document.querySelectorAll('a, button, div, span').forEach(el => {
-        const text = (el.innerText || el.textContent || '').trim().toLowerCase();
-        if (text.includes('powered by netlify') || text === 'netlify') {
-          el.remove();
-        }
+      // 2. Scan all bottom/floating elements with text related to Netlify
+      document.querySelectorAll('a, button, div, span, footer').forEach(el => {
+        try {
+          const text = (el.innerText || el.textContent || '').trim().toLowerCase();
+          if (text.includes('powered by netlify') || text === 'netlify' || (text.includes('powered by') && text.includes('netlify'))) {
+            el.remove();
+          }
+        } catch (e) {}
       });
 
       // 3. Purge elements containing shadowRoots
       document.querySelectorAll('*').forEach(el => {
-        if (el.shadowRoot) {
-          const shadowBadge = el.shadowRoot.querySelector('[aria-label*="Netlify"], .netlify-badge, a[href*="netlify"]');
-          if (shadowBadge) {
-            el.remove();
+        try {
+          if (el.shadowRoot) {
+            const shadowBadge = el.shadowRoot.querySelector('iframe, [aria-label*="Netlify" i], .netlify-badge, a[href*="netlify"]');
+            if (shadowBadge) {
+              el.remove();
+            }
           }
-        }
+        } catch (e) {}
       });
     };
 
     purge();
     const observer = new MutationObserver(() => purge());
     observer.observe(document.documentElement, { childList: true, subtree: true });
-    setInterval(purge, 800);
+    setInterval(purge, 300);
   }
 }
 
