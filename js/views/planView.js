@@ -137,32 +137,6 @@ export class PlanView {
                 ${this.renderTimeBlocksList(plan.timeBlocks)}
               </div>
             </div>
-
-            <!-- 5. Evening Reflection Card -->
-            <div class="card plan-card">
-              <div class="card-header">
-                <div class="card-title-group">
-                  <span class="card-eyebrow">Evening Closure</span>
-                  <h2 class="card-title">Reflection & Gratitude</h2>
-                </div>
-                <button class="btn btn-sm btn-primary" id="save-evening-btn">Save Reflection</button>
-              </div>
-
-              <div class="form-group">
-                <label for="evening-wins-input" class="form-label">🌟 What went well today? (Wins & Accomplishments)</label>
-                <textarea id="evening-wins-input" class="form-textarea" rows="2" placeholder="Celebrate small victories and moments of progress...">${escapeHtml(plan.eveningReflection ? plan.eveningReflection.wins : '')}</textarea>
-              </div>
-
-              <div class="form-group">
-                <label for="evening-lessons-input" class="form-label">💡 What did I learn or notice?</label>
-                <textarea id="evening-lessons-input" class="form-textarea" rows="2" placeholder="Insights about your work, energy, or relationships...">${escapeHtml(plan.eveningReflection ? plan.eveningReflection.lessons : '')}</textarea>
-              </div>
-
-              <div class="form-group">
-                <label for="evening-gratitude-input" class="form-label">🙏 What am I grateful for tonight?</label>
-                <textarea id="evening-gratitude-input" class="form-textarea" rows="2" placeholder="People, simple comforts, sunlight, warm food...">${escapeHtml(plan.eveningReflection ? plan.eveningReflection.gratitude : '')}</textarea>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -262,18 +236,6 @@ export class PlanView {
         store.toggleTask(id);
         this.render();
       });
-    });
-
-    // Save evening reflection
-    this.container.querySelector('#save-evening-btn')?.addEventListener('click', () => {
-      const wins = this.container.querySelector('#evening-wins-input').value.trim();
-      const lessons = this.container.querySelector('#evening-lessons-input').value.trim();
-      const gratitude = this.container.querySelector('#evening-gratitude-input').value.trim();
-
-      store.saveDailyPlan(this.currentDateStr, {
-        eveningReflection: { wins, lessons, gratitude }
-      });
-      toast.success('Evening reflection recorded');
     });
 
     // Rollover tasks to tomorrow
