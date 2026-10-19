@@ -258,3 +258,41 @@
   border-color: var(--accent-border);
   color: var(--accent);
 }
+
+/* Mobile Responsiveness for Daily Plan */
+@media (max-width: 768px) {
+  .plan-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .plan-date-navigator {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .plan-date-center {
+    font-size: 0.95rem;
+  }
+
+  .plan-card {
+    padding: 16px;
+  }
+
+  .energy-selector {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .energy-btn {
+    flex: 1;
+    min-height: 44px;
+    padding: 6px 2px;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+}
+

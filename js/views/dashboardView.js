@@ -32,8 +32,21 @@ export class DashboardView {
     const allEntries = store.getJournalEntries();
     const latestEntry = allEntries.length > 0 ? allEntries[0] : null;
 
+    const isDemo = user.isDemoLoaded === true;
+    const displayName = user.name ? `, ${escapeHtml(user.name)}` : '';
+
     this.container.innerHTML = `
       <div class="view-content dashboard-view">
+        ${isDemo ? `
+          <div class="demo-active-banner animate-fade-in">
+            <div class="demo-banner-content">
+              <span class="demo-badge">Demo Mode</span>
+              <p class="demo-banner-text">You are currently previewing sample data. You can explore freely or start completely fresh.</p>
+            </div>
+            <button class="btn btn-sm btn-secondary demo-clear-btn" id="dash-clear-demo-btn">Switch to Clean Workspace</button>
+          </div>
+        ` : ''}
+
         <!-- Top Editorial Header & Greeting with Live Real-Time & Date -->
         <header class="dashboard-header">
           <div class="header-intro">
@@ -44,7 +57,7 @@ export class DashboardView {
               </span>
             </div>
             <h1 class="header-greeting" id="dash-live-greeting">
-              <span class="greeting-text">${greetingDetails.greeting}</span>, ${escapeHtml(user.name || 'Friend')} <span class="greeting-emoji" id="dash-live-emoji">${greetingDetails.icon}</span>
+              <span class="greeting-text">${greetingDetails.greeting}</span>${displayName} <span class="greeting-emoji" id="dash-live-emoji">${greetingDetails.icon}</span>
             </h1>
             <p class="header-subtext" id="dash-live-subtext">${greetingDetails.message}</p>
           </div>
@@ -318,6 +331,11 @@ export class DashboardView {
     this.container.querySelector('#dash-quick-journal')?.addEventListener('click', () => this.onOpenJournalEditor());
     this.container.querySelector('#dash-quick-plan')?.addEventListener('click', () => this.onNavigate('plan'));
     this.container.querySelector('#dash-quick-calendar')?.addEventListener('click', () => this.onNavigate('calendar'));
+
+    this.container.querySelector('#dash-clear-demo-btn')?.addEventListener('click', () => {
+      store.clearAllData();
+      toast.success('Clean workspace activated.');
+    });
 
     // Card link buttons
     this.container.querySelector('#dash-manage-plan')?.addEventListener('click', () => this.onNavigate('plan'));

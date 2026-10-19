@@ -288,8 +288,18 @@ export class TasksView {
   }
 
   renderEmptyState() {
+    const isAll = this.activeTab === 'all' || this.activeTab === 'today';
+    const totalTasks = store.getTasks().length;
+
+    let title = 'Clean Slate';
     let msg = 'No tasks in this view.';
-    if (this.activeTab === 'today') {
+    let btnText = '+ Create New Task';
+
+    if (totalTasks === 0) {
+      title = 'Your Daybook is Empty';
+      msg = 'Create your first task to start organizing your daily priorities and routines.';
+      btnText = '+ Create Your First Task';
+    } else if (this.activeTab === 'today') {
       msg = 'All clear for today! Take time to reflect or plan what comes next.';
     } else if (this.activeTab === 'overdue') {
       msg = 'No overdue tasks! You are right on schedule.';
@@ -302,9 +312,9 @@ export class TasksView {
     return `
       <div class="empty-state">
         <div class="empty-icon">✓</div>
-        <h3 class="empty-title">Clean Slate</h3>
+        <h3 class="empty-title">${title}</h3>
         <p class="empty-text">${msg}</p>
-        <button class="btn btn-primary" id="empty-add-task-btn">+ Create New Task</button>
+        <button class="btn btn-primary" id="empty-add-task-btn">${btnText}</button>
       </div>
     `;
   }

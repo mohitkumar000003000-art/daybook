@@ -147,6 +147,43 @@
     </main>
   </div>
 
+  <!-- Mobile Bottom Navigation (Visible on phones/small screens) -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <button class="mobile-nav-item active" data-nav="dashboard" aria-label="Dashboard">
+      <span class="m-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </span>
+      <span class="m-nav-label">Home</span>
+    </button>
+
+    <button class="mobile-nav-item" data-nav="plan" aria-label="Daily Plan">
+      <span class="m-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      </span>
+      <span class="m-nav-label">Plan</span>
+    </button>
+
+    <button class="mobile-nav-item mobile-nav-quick-add" id="mobile-quick-action-btn" aria-label="Quick Add">
+      <span class="m-nav-quick-plus">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </span>
+    </button>
+
+    <button class="mobile-nav-item" data-nav="tasks" aria-label="Tasks">
+      <span class="m-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </span>
+      <span class="m-nav-label">Tasks</span>
+    </button>
+
+    <button class="mobile-nav-item" data-nav="journal" aria-label="Journal">
+      <span class="m-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </span>
+      <span class="m-nav-label">Journal</span>
+    </button>
+  </nav>
+
   <!-- Entry Script -->
   <script type="module" src="js/app.js"></script>
 </body>

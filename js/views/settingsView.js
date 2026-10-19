@@ -80,22 +80,21 @@ export class SettingsView {
           <div class="card settings-card privacy-card">
             <div class="card-header">
               <div class="card-title-group">
-                <span class="card-eyebrow">Zero Cloud Tracking</span>
-                <h2 class="card-title">Data Privacy & Local Storage</h2>
+                <span class="card-eyebrow">Privacy & Sovereignty</span>
+                <h2 class="card-title">Data Storage & Account Sync</h2>
               </div>
-              <span class="privacy-badge">🔒 100% Private</span>
+              <span class="privacy-badge">🔒 Private by Default</span>
             </div>
 
             <div class="privacy-explanation">
               <p>
-                <strong>Daybook is strictly private by design.</strong> Unlike ordinary online services that store personal thoughts on remote servers, 
-                everything you write in Daybook—your journal entries, daily goals, reflections, and tasks—is saved directly inside your browser’s local storage.
+                <strong>Daybook is private by design.</strong> By default, all your personal planner tasks, daily goals, and journal reflections are stored directly inside this browser’s private local storage.
               </p>
               <ul class="privacy-bullets">
-                <li>No account creation or password tracking</li>
-                <li>Zero advertising telemetry or external cloud sync</li>
-                <li>Data remains on your device at all times</li>
-                <li>To transfer your records across computers, use the JSON Backup export below</li>
+                <li><strong>Local-first storage:</strong> Your notes and tasks live on your device and are isolated per browser and user profile.</li>
+                <li><strong>Selective account sync:</strong> When you connect your Google or Email account, only your own authenticated records sync to your account. No unauthenticated devices or third parties receive your data.</li>
+                <li><strong>Zero advertising trackers:</strong> No third-party ad networks, no data brokers, and no tracking scripts.</li>
+                <li><strong>Full data portability:</strong> You can export complete JSON snapshots or restore backups at any time.</li>
               </ul>
             </div>
 
@@ -215,9 +214,9 @@ export class SettingsView {
 
     // Save profile name
     this.container.querySelector('#save-profile-btn')?.addEventListener('click', () => {
-      const name = this.container.querySelector('#settings-user-name').value.trim() || 'Alex';
+      const name = this.container.querySelector('#settings-user-name').value.trim();
       store.updateUserSettings({ name });
-      toast.success('Profile updated');
+      toast.success(name ? `Profile updated for ${name}` : 'Profile updated');
     });
 
     // Bind Auth Section events (Sign in with Google & Continue with email)

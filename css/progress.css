@@ -388,3 +388,36 @@ kbd {
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
+
+/* Mobile Responsiveness for Progress & Settings */
+@media (max-width: 768px) {
+  .progress-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .progress-lower-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .backup-actions-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .settings-card {
+    padding: 16px;
+  }
+
+  .danger-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .danger-actions-row .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+

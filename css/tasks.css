@@ -362,3 +362,86 @@
   align-items: center;
   gap: 10px;
 }
+
+/* Mobile Responsiveness for Tasks */
+@media (max-width: 768px) {
+  .tasks-tabs-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .tab-pills {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-progress-summary {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .tab-progress-bar {
+    flex: 1;
+    max-width: 140px;
+  }
+
+  .tasks-filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .search-box {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .category-filter-scroll {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-dropdowns {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .filter-dropdowns .form-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .task-row-actions {
+    opacity: 1; /* Always visible on touch screens */
+  }
+
+  .full-task-row {
+    padding: 12px 10px;
+  }
+
+  .quick-add-task-bar {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-dropdowns {
+    flex-direction: column;
+  }
+
+  .filter-dropdowns .form-select {
+    width: 100%;
+  }
+
+  .task-meta-tags {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
+

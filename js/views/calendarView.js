@@ -47,12 +47,13 @@ export class CalendarView {
             <p class="page-subtext">View your tasks and reflective writings across time. Inspect any past day or plan ahead.</p>
           </div>
           <div class="view-header-actions">
-            <!-- Mode Toggle: Month / Week -->
-            <div class="btn-group">
+            <!-- Mode Toggle: Month / Week / Agenda -->
+            <div class="btn-group cal-mode-group">
               <button class="btn btn-sm ${this.calendarMode === 'month' ? 'btn-primary' : 'btn-secondary'}" id="cal-mode-month">Month</button>
               <button class="btn btn-sm ${this.calendarMode === 'week' ? 'btn-primary' : 'btn-secondary'}" id="cal-mode-week">Week</button>
+              <button class="btn btn-sm ${this.calendarMode === 'agenda' ? 'btn-primary' : 'btn-secondary'}" id="cal-mode-agenda">Agenda</button>
             </div>
-            <button class="btn btn-secondary btn-sm" id="cal-today-btn">Jump to Today</button>
+            <button class="btn btn-secondary btn-sm cal-today-action-btn" id="cal-today-btn">Today</button>
           </div>
         </header>
 
@@ -78,8 +79,8 @@ export class CalendarView {
               </div>
             </div>
 
-            <!-- Calendar Display: Month or Week -->
-            ${this.calendarMode === 'month' ? this.renderMonthGrid() : this.renderWeekGrid()}
+            <!-- Calendar Display: Month, Week, or Agenda -->
+            ${this.calendarMode === 'month' ? this.renderMonthGrid() : (this.calendarMode === 'week' ? this.renderWeekGrid() : this.renderAgendaView())}
           </div>
 
           <!-- Right: Day Inspector Panel -->
@@ -295,6 +296,88 @@ export class CalendarView {
     `;
   }
 
+  renderAgendaView() {
+    // Collect next 14 days or days of the current month that have tasks or journal entries
+    const daysWithContent = [];
+    const todayStr = getTodayString();
+    
+    // Scan all tasks & entries to collect active dates
+    const dateMap = new Map();
+    const allTasks = store.getTasks();
+    const allEntries = store.getJournalEntries();
+
+    allTasks.forEach(t => {
+      if (!t.dueDate) return;
+      if (!dateMap.has(t.dueDate)) dateMap.set(t.dueDate, { tasks: [], entries: [] });
+      dateMap.get(t.dueDate).tasks.push(t);
+    });
+
+    allEntries.forEach(e => {
+      if (!e.date) return;
+      if (!dateMap.has(e.date)) dateMap.set(e.date, { tasks: [], entries: [] });
+      dateMap.get(e.date).entries.push(e);
+    });
+
+    // Sort dates
+    const sortedDates = Array.from(dateMap.keys()).sort();
+
+    if (sortedDates.length === 0) {
+      return `
+        <div class="empty-state calendar-agenda-empty">
+          <div class="empty-icon">📅</div>
+          <h3 class="empty-title">Agenda is Empty</h3>
+          <p class="empty-text">No scheduled tasks or reflections recorded yet. Pick any day to plan or write.</p>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="calendar-agenda-list">
+        ${sortedDates.map(dStr => {
+          const item = dateMap.get(dStr);
+          const isSelected = dStr === this.selectedDateStr;
+          const isTodayItem = isToday(dStr);
+          const formatted = formatDisplayDate(dStr, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+          return `
+            <div class="agenda-day-card ${isSelected ? 'agenda-selected' : ''}" data-date="${dStr}">
+              <div class="agenda-day-header">
+                <div class="agenda-day-title-wrap">
+                  <span class="agenda-day-date">${formatted}</span>
+                  ${isTodayItem ? `<span class="badge-today-pill">Today</span>` : ''}
+                </div>
+                <span class="agenda-day-stats">${item.tasks.length} tasks • ${item.entries.length} entries</span>
+              </div>
+
+              ${item.tasks.length > 0 ? `
+                <div class="agenda-tasks-list">
+                  ${item.tasks.map(t => `
+                    <div class="agenda-task-item ${t.completed ? 'completed' : ''}">
+                      <span class="agenda-task-bullet">•</span>
+                      <span class="agenda-task-title">${escapeHtml(t.title)}</span>
+                      ${t.dueTime ? `<span class="agenda-task-time">${formatTime(t.dueTime)}</span>` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+
+              ${item.entries.length > 0 ? `
+                <div class="agenda-entries-list">
+                  ${item.entries.map(e => `
+                    <div class="agenda-entry-chip" data-entry-id="${e.id}">
+                      <span class="agenda-entry-icon">📖</span>
+                      <span class="agenda-entry-title">${escapeHtml(e.title || 'Journal Entry')}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
   bindEvents() {
     // Mode switcher
     this.container.querySelector('#cal-mode-month')?.addEventListener('click', () => {
@@ -304,6 +387,11 @@ export class CalendarView {
 
     this.container.querySelector('#cal-mode-week')?.addEventListener('click', () => {
       this.calendarMode = 'week';
+      this.render();
+    });
+
+    this.container.querySelector('#cal-mode-agenda')?.addEventListener('click', () => {
+      this.calendarMode = 'agenda';
       this.render();
     });
 

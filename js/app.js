@@ -15,6 +15,7 @@ import { ProgressView } from './views/progressView.js';
 import { SettingsView } from './views/settingsView.js';
 import { attachButtonRipples } from './utils/interactiveFX.js';
 import { openGoogleSignInModal } from './components/googleAuthModal.js';
+import { shouldShowOnboarding, showOnboardingModal } from './components/onboardingModal.js';
 
 class App {
   constructor() {
@@ -65,7 +66,7 @@ class App {
     const user = store.getUserSettings();
     this.applyTheme(user.theme || 'light');
 
-    // 2. Setup sidebar navigation listeners
+    // 2. Setup sidebar and mobile bottom navigation listeners
     this.bindNavigation();
 
     // 3. Setup global task modal button in sidebar
@@ -77,6 +78,11 @@ class App {
     document.getElementById('sidebar-new-journal-btn')?.addEventListener('click', () => {
       this.openJournalEditor();
       this.closeMobileSidebar();
+    });
+
+    // Mobile quick action button in bottom navigation
+    document.getElementById('mobile-quick-action-btn')?.addEventListener('click', () => {
+      this.openTaskModal();
     });
 
     // 4. Mobile sidebar toggle
@@ -134,6 +140,14 @@ class App {
     this.updateSidebarUserProfile();
     this.navigate('dashboard');
     attachButtonRipples(document.body);
+
+    // 9. Check first-run onboarding
+    if (shouldShowOnboarding()) {
+      showOnboardingModal((choice) => {
+        this.updateSidebarUserProfile();
+        this.renderCurrentView();
+      });
+    }
   }
 
   updateSidebarUserProfile() {
@@ -144,9 +158,9 @@ class App {
     const statusEl = document.getElementById('sidebar-user-status');
 
     if (googleAccount && googleAccount.isSignedIn) {
-      if (nameEl) nameEl.textContent = googleAccount.name || user.name || 'Alex';
+      if (nameEl) nameEl.textContent = googleAccount.name || user.name || 'My Daybook';
       if (avatarEl) {
-        avatarEl.textContent = (googleAccount.name || user.name || 'G').charAt(0).toUpperCase();
+        avatarEl.textContent = (googleAccount.name || user.name || 'D').charAt(0).toUpperCase();
         avatarEl.style.backgroundColor = 'var(--accent)';
         avatarEl.style.color = '#FFFFFF';
       }
@@ -155,9 +169,9 @@ class App {
         statusEl.innerHTML = `<span style="color:#436A57; font-weight:600;">✓ ${providerLabel} Connected</span>`;
       }
     } else {
-      if (nameEl) nameEl.textContent = `${user.name || 'Alex'}'s Daybook`;
+      if (nameEl) nameEl.textContent = user.name ? `${user.name}'s Daybook` : 'My Daybook';
       if (avatarEl) {
-        avatarEl.textContent = (user.name || 'A').charAt(0).toUpperCase();
+        avatarEl.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'D';
         avatarEl.style.backgroundColor = 'var(--bg-subtle)';
         avatarEl.style.color = 'var(--text-primary)';
       }
@@ -180,6 +194,7 @@ class App {
   }
 
   bindNavigation() {
+    // Sidebar nav buttons
     const navButtons = document.querySelectorAll('.sidebar-nav-btn[data-nav]');
     navButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -188,18 +203,36 @@ class App {
         this.closeMobileSidebar();
       });
     });
+
+    // Mobile bottom navigation items
+    const mobileBottomItems = document.querySelectorAll('.mobile-nav-item[data-nav]');
+    mobileBottomItems.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetView = btn.getAttribute('data-nav');
+        this.navigate(targetView);
+      });
+    });
   }
 
   navigate(viewName) {
     if (!this.views[viewName]) return;
     this.currentView = viewName;
 
-    // Update active nav button
+    // Update active nav button in sidebar
     document.querySelectorAll('.sidebar-nav-btn').forEach(btn => {
       if (btn.getAttribute('data-nav') === viewName) {
         btn.classList.add('active');
       } else {
         btn.classList.remove('active');
+      }
+    });
+
+    // Update active nav item in mobile bottom navigation
+    document.querySelectorAll('.mobile-nav-item[data-nav]').forEach(item => {
+      if (item.getAttribute('data-nav') === viewName) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
       }
     });
 

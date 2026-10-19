@@ -20,7 +20,8 @@ export function getDemoData() {
       name: "Alex",
       theme: "light",
       dailyQuote: true,
-      hasSeenDemoNotice: false
+      hasSeenDemoNotice: true,
+      isDemoLoaded: true
     },
     categories: [
       { id: "work", name: "Work", color: "#455A64" },

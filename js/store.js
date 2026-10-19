@@ -25,11 +25,39 @@ class Store {
         }
       }
     } catch (err) {
-      console.warn('Failed to parse stored Daybook data. Initializing demo data.', err);
+      console.warn('Failed to parse stored Daybook data. Initializing clean workspace.', err);
     }
-    const initial = getDemoData();
-    this.saveToStorage(initial);
-    return initial;
+    // New users start with a clean empty workspace: no pre-filled profile, tasks, entries, or demo stats.
+    const emptyInitial = this.getCleanEmptyState();
+    return emptyInitial;
+  }
+
+  getCleanEmptyState() {
+    return {
+      user: {
+        name: '',
+        theme: 'light',
+        dailyQuote: true,
+        hasSeenDemoNotice: true,
+        isDemoLoaded: false,
+        googleAccount: { isSignedIn: false }
+      },
+      categories: [
+        { id: "work", name: "Work", color: "#455A64" },
+        { id: "personal", name: "Personal", color: "#9E472A" },
+        { id: "study", name: "Study", color: "#2B5B84" },
+        { id: "health", name: "Health", color: "#436A57" },
+        { id: "creative", name: "Creative", color: "#8E44AD" }
+      ],
+      tasks: [],
+      journalEntries: [],
+      dailyPlans: {},
+      quotes: getDemoData().quotes
+    };
+  }
+
+  hasStoredData() {
+    return !!localStorage.getItem(STORAGE_KEY);
   }
 
   saveToStorage(customData = null) {
@@ -366,7 +394,7 @@ class Store {
   // ----------------------------------------------------
   getUserSettings() {
     if (!this.data.user) {
-      this.data.user = { name: 'Alex', theme: 'light', dailyQuote: true, googleAccount: { isSignedIn: false } };
+      this.data.user = { name: '', theme: 'light', dailyQuote: true, googleAccount: { isSignedIn: false } };
     }
     if (!this.data.user.googleAccount) {
       this.data.user.googleAccount = { isSignedIn: false };
@@ -459,24 +487,15 @@ class Store {
 
   resetToDemoData() {
     this.data = getDemoData();
+    if (this.data.user) {
+      this.data.user.isDemoLoaded = true;
+    }
     this.saveToStorage();
     this.notify('data:reset', this.data);
   }
 
   clearAllData() {
-    this.data = {
-      user: { name: 'Friend', theme: 'light', dailyQuote: true, hasSeenDemoNotice: true },
-      categories: [
-        { id: "work", name: "Work", color: "#455A64" },
-        { id: "personal", name: "Personal", color: "#9E472A" },
-        { id: "study", name: "Study", color: "#2B5B84" },
-        { id: "health", name: "Health", color: "#436A57" }
-      ],
-      tasks: [],
-      journalEntries: [],
-      dailyPlans: {},
-      quotes: getDemoData().quotes
-    };
+    this.data = this.getCleanEmptyState();
     this.saveToStorage();
     this.notify('data:cleared', this.data);
   }

@@ -183,12 +183,29 @@ export class JournalView {
   }
 
   renderEmptyList() {
+    const totalEntries = store.getJournalEntries().length;
+    const isFiltered = this.searchQuery.trim() || this.selectedMood !== 'all' || this.selectedTag !== 'all';
+
+    let title = 'Every day is a fresh page';
+    let msg = 'Taking just five minutes to write will help you untangle thoughts and record your life story.';
+    let btnText = 'Write Your First Journal Entry';
+
+    if (totalEntries === 0) {
+      title = 'Your Journal is Empty';
+      msg = 'No reflections recorded yet. Enjoy the quiet open space and begin putting your thoughts into words.';
+      btnText = 'Write Your First Journal Entry';
+    } else if (isFiltered) {
+      title = 'No Matching Reflections';
+      msg = 'No journal entries matched your current search filters.';
+      btnText = 'Clear Filters';
+    }
+
     return `
       <div class="empty-state journal-empty-state">
         <div class="empty-icon">✍️</div>
-        <h3 class="empty-title">Every day is a fresh page</h3>
-        <p class="empty-text">No journal entries found. Taking just five minutes to write will help you untangle thoughts and record your life story.</p>
-        <button class="btn btn-primary" id="empty-new-entry-btn">Write Today's Entry</button>
+        <h3 class="empty-title">${title}</h3>
+        <p class="empty-text">${msg}</p>
+        <button class="btn btn-primary" id="empty-new-entry-btn">${btnText}</button>
       </div>
     `;
   }
@@ -201,9 +218,17 @@ export class JournalView {
     });
 
     this.container.querySelector('#empty-new-entry-btn')?.addEventListener('click', () => {
-      this.currentEntryId = null;
-      this.mode = 'editor';
-      this.render();
+      const totalEntries = store.getJournalEntries().length;
+      if (totalEntries > 0 && (this.searchQuery.trim() || this.selectedMood !== 'all' || this.selectedTag !== 'all')) {
+        this.searchQuery = '';
+        this.selectedMood = 'all';
+        this.selectedTag = 'all';
+        this.render();
+      } else {
+        this.currentEntryId = null;
+        this.mode = 'editor';
+        this.render();
+      }
     });
 
     // Search input

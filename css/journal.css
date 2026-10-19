@@ -536,3 +536,88 @@
   gap: 6px;
   color: var(--text-muted);
 }
+
+/* Mobile Responsiveness for Journal & Editor */
+@media (max-width: 768px) {
+  .journal-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .journal-filters {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .journal-filters .form-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .journal-entries-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .editor-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .editor-header-left,
+  .editor-header-right {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .editor-meta-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .meta-field-tags {
+    width: 100%;
+  }
+
+  .journal-paper-card {
+    padding: 18px 14px;
+  }
+
+  .journal-title-input {
+    font-size: 1.6rem;
+  }
+
+  .editor-toolbar {
+    top: 56px;
+    padding: 6px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .toolbar-group {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .journal-filters {
+    flex-direction: column;
+  }
+
+  .journal-card {
+    padding: 16px 14px;
+  }
+
+  .editor-statusbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
