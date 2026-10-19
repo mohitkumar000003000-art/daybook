@@ -88,37 +88,6 @@ export class PlanView {
               </div>
             </div>
 
-            <!-- 2. Morning Planning & Intention Card -->
-            <div class="card plan-card">
-              <div class="card-header">
-                <div class="card-title-group">
-                  <span class="card-eyebrow">Morning Kickoff</span>
-                  <h2 class="card-title">Intention & Energy</h2>
-                </div>
-                <button class="btn btn-sm btn-primary" id="save-morning-btn">Save</button>
-              </div>
-
-              <div class="form-group">
-                <label for="morning-intention-input" class="form-label">Guiding Intention for the Day</label>
-                <textarea id="morning-intention-input" class="form-textarea" rows="3" placeholder="How do you want to show up today? What attitude or principle will you hold?">${escapeHtml(plan.morningIntention || '')}</textarea>
-              </div>
-
-              <div class="form-row-2">
-                <div class="form-group">
-                  <label for="morning-focus-word" class="form-label">Daily Focus Word</label>
-                  <input type="text" id="morning-focus-word" class="form-input" placeholder="e.g., Clarity, Presence, Patience" value="${escapeHtml(plan.focusWord || '')}" maxlength="24" />
-                </div>
-
-                <div class="form-group">
-                  <label for="morning-energy-level" class="form-label">Starting Energy Level (1-5)</label>
-                  <div class="energy-selector" id="energy-selector">
-                    ${[1, 2, 3, 4, 5].map(lvl => `
-                      <button type="button" class="energy-btn ${plan.energyLevel === lvl ? 'active' : ''}" data-level="${lvl}">
-                        ${lvl} ⚡
-                      </button>
-                    `).join('')}
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -293,28 +262,6 @@ export class PlanView {
         store.toggleTask(id);
         this.render();
       });
-    });
-
-    // Energy level selection
-    let selectedEnergy = store.getDailyPlan(this.currentDateStr).energyLevel || 3;
-    this.container.querySelectorAll('.energy-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        this.container.querySelectorAll('.energy-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedEnergy = parseInt(btn.getAttribute('data-level'), 10);
-      });
-    });
-
-    // Save morning intention
-    this.container.querySelector('#save-morning-btn')?.addEventListener('click', () => {
-      const morningIntention = this.container.querySelector('#morning-intention-input').value.trim();
-      const focusWord = this.container.querySelector('#morning-focus-word').value.trim();
-      store.saveDailyPlan(this.currentDateStr, {
-        morningIntention,
-        focusWord,
-        energyLevel: selectedEnergy
-      });
-      toast.success('Morning plan saved');
     });
 
     // Save evening reflection
