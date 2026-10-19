@@ -57,7 +57,7 @@ export class DashboardView {
               </span>
             </div>
             <h1 class="header-greeting" id="dash-live-greeting">
-              <span class="greeting-text">${greetingDetails.greeting}</span>${displayName} <span class="greeting-emoji" id="dash-live-emoji">${greetingDetails.icon}</span>
+              <span class="greeting-text">${greetingDetails.greeting}</span>${displayName}
             </h1>
             <p class="header-subtext" id="dash-live-subtext">${greetingDetails.message}</p>
           </div>
@@ -433,7 +433,6 @@ export class DashboardView {
       const info = getGreetingDetails(cur);
       if (greetingText && greetingText.textContent !== info.greeting) {
         greetingText.textContent = info.greeting;
-        if (greetingEmoji) greetingEmoji.textContent = info.icon;
         if (subtext) subtext.textContent = info.message;
       }
 
