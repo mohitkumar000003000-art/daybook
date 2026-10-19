@@ -118,7 +118,7 @@ export class CalendarView {
               <div class="inspector-tasks-list">
                 ${dayTasks.length === 0 ? `<p class="empty-hint">No tasks scheduled for this day.</p>` : `
                   ${dayTasks.map(task => `
-                    <div class="inspector-task-item ${task.completed ? 'completed' : ''}">
+                    <div class="inspector-task-item ${task.completed ? 'completed' : ''}" data-task-id="${task.id}">
                       <button class="task-checkbox-btn ${task.completed ? 'checked' : ''}" data-action="toggle-task" data-id="${task.id}" aria-label="Toggle task">
                         ${task.completed ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
                       </button>
@@ -352,7 +352,7 @@ export class CalendarView {
               ${item.tasks.length > 0 ? `
                 <div class="agenda-tasks-list">
                   ${item.tasks.map(t => `
-                    <div class="agenda-task-item ${t.completed ? 'completed' : ''}">
+                    <div class="agenda-task-item ${t.completed ? 'completed' : ''}" data-task-id="${t.id}" style="cursor:pointer">
                       <span class="agenda-task-bullet">•</span>
                       <span class="agenda-task-title">${escapeHtml(t.title)}</span>
                       ${t.dueTime ? `<span class="agenda-task-time">${formatTime(t.dueTime)}</span>` : ''}
@@ -470,6 +470,17 @@ export class CalendarView {
         const id = btn.getAttribute('data-id');
         store.toggleTask(id);
         this.render();
+      });
+    });
+
+    // Inspector & agenda task click to view/edit
+    this.container.querySelectorAll('.inspector-task-item, .agenda-task-item').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('[data-action="toggle-task"]')) return;
+        const id = el.getAttribute('data-task-id');
+        if (id) {
+          this.onOpenTaskModal(id);
+        }
       });
     });
 

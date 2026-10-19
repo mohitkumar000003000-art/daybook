@@ -401,6 +401,18 @@ export class DashboardView {
       });
     });
 
+    // Click task row to open task modal
+    this.container.querySelectorAll('.task-row').forEach(row => {
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('[data-action="toggle-task"]')) return;
+        const id = row.getAttribute('data-task-id');
+        if (id) {
+          this.onOpenTaskModal(id);
+        }
+      });
+    });
+
     // Read latest entry
     this.container.querySelectorAll('.read-entry-btn, .latest-entry-card').forEach(el => {
       el.addEventListener('click', (e) => {

@@ -440,6 +440,20 @@ export class TasksView {
       });
     });
 
+    // Click full task row to open details/edit
+    this.container.querySelectorAll('.full-task-row').forEach(row => {
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('[data-action="toggle-task"], [data-action="delete-task"], [data-action="edit-task"], .drag-handle')) {
+          return;
+        }
+        const id = row.getAttribute('data-task-id');
+        if (id) {
+          this.onOpenTaskModal(id);
+        }
+      });
+    });
+
     // Delete task
     this.container.querySelectorAll('[data-action="delete-task"]').forEach(btn => {
       btn.addEventListener('click', async (e) => {

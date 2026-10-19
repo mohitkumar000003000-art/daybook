@@ -28,6 +28,7 @@ class ModalManager {
 
     overlay.innerHTML = `
       <div class="modal-dialog ${options.dialogClass || ''}" ${maxWidth}>
+        <div class="modal-mobile-handle" aria-hidden="true"></div>
         <div class="modal-header">
           <h2 id="modal-title" class="modal-title">${title}</h2>
           <button class="modal-close-btn" aria-label="Close dialog">
