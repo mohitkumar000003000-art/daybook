@@ -37,9 +37,6 @@ export function showOnboardingModal(onComplete) {
 
   overlay.innerHTML = `
     <div class="onboarding-dialog animate-scale-up" role="dialog" aria-modal="true" aria-labelledby="onboarding-welcome-title">
-      <div class="onboarding-badge">
-        <span class="brand-monogram">D</span>
-      </div>
 
       <h1 class="onboarding-title" id="onboarding-welcome-title">Welcome to Daybook</h1>
       <p class="onboarding-subtitle">
