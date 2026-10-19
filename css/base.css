@@ -304,3 +304,22 @@ a:hover {
   }
 }
 
+/* ----------------------------------------------------
+   HIDE INJECTED PLATFORM BADGES (Netlify badge)
+   ---------------------------------------------------- */
+#nl-badge,
+.nl-badge,
+[aria-label*="Powered by Netlify"],
+[id*="netlify"],
+[class*="netlify-badge"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+

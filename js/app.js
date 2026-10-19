@@ -141,6 +141,9 @@ class App {
     this.navigate('dashboard');
     attachButtonRipples(document.body);
 
+    // Suppress any platform badge injection (e.g. Netlify badge)
+    this.suppressPlatformBadges();
+
     // 9. Check first-run onboarding
     if (shouldShowOnboarding()) {
       showOnboardingModal((choice) => {
@@ -393,6 +396,25 @@ class App {
   closeMobileSidebar() {
     this.sidebar?.classList.remove('open');
     this.sidebarOverlay?.classList.remove('visible');
+  }
+
+  suppressPlatformBadges() {
+    const purge = () => {
+      document.querySelectorAll('#nl-badge, .nl-badge, [aria-label*="Netlify"], [id*="netlify"], [class*="netlify-badge"]').forEach(el => {
+        el.remove();
+      });
+      // Also check any anchors with netlify href in bottom corner
+      document.querySelectorAll('a[href*="netlify.com"], a[href*="netlify.app"]').forEach(a => {
+        if (a.textContent.toLowerCase().includes('netlify')) {
+          a.style.setProperty('display', 'none', 'important');
+          a.remove();
+        }
+      });
+    };
+
+    purge();
+    const observer = new MutationObserver(() => purge());
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 }
 
