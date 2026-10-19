@@ -1,0 +1,693 @@
+/* ====================================================
+   DAYBOOK ADVANCED ANIMATIONS & INTERACTIVE DYNAMICS
+   ==================================================== */
+
+/* ----------------------------------------------------
+   1. AMBIENT BACKGROUND & GLOW EFFECTS
+   ---------------------------------------------------- */
+body::before {
+  content: '';
+  position: fixed;
+  top: -150px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(158, 71, 42, 0.045) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: floatAmbient 18s ease-in-out infinite alternate;
+}
+
+[data-theme="dark"] body::before {
+  background: radial-gradient(circle, rgba(222, 117, 82, 0.08) 0%, transparent 70%);
+}
+
+@keyframes floatAmbient {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-60px, 80px) scale(1.15); }
+  100% { transform: translate(40px, -40px) scale(0.95); }
+}
+
+/* ----------------------------------------------------
+   2. VIEW TRANSITIONS & CASCADING ENTRANCES
+   ---------------------------------------------------- */
+@keyframes viewEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.99);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.view-content {
+  animation: viewEntrance 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Staggered card cascading */
+.stat-card:nth-child(1) { animation: cardPopIn 450ms cubic-bezier(0.34, 1.3, 0.64, 1) 40ms both; }
+.stat-card:nth-child(2) { animation: cardPopIn 450ms cubic-bezier(0.34, 1.3, 0.64, 1) 90ms both; }
+.stat-card:nth-child(3) { animation: cardPopIn 450ms cubic-bezier(0.34, 1.3, 0.64, 1) 140ms both; }
+.stat-card:nth-child(4) { animation: cardPopIn 450ms cubic-bezier(0.34, 1.3, 0.64, 1) 190ms both; }
+
+@keyframes cardPopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.94);
+  }
+  70% {
+    transform: translateY(-2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dashboard-grid .dashboard-col:nth-child(1) {
+  animation: viewEntrance 500ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+}
+
+.dashboard-grid .dashboard-col:nth-child(2) {
+  animation: viewEntrance 500ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
+}
+
+/* ----------------------------------------------------
+   3. GREETING WAVE & BRAND LOGO FLOAT
+   ---------------------------------------------------- */
+@keyframes waveHand {
+  0% { transform: rotate(0deg); }
+  15% { transform: rotate(16deg) scale(1.15); }
+  30% { transform: rotate(-12deg) scale(1.15); }
+  45% { transform: rotate(14deg); }
+  60% { transform: rotate(-6deg); }
+  75% { transform: rotate(8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.waving-hand {
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: waveHand 1.6s ease-in-out 600ms;
+}
+
+.header-greeting:hover .waving-hand {
+  animation: waveHand 1.2s ease-in-out;
+}
+
+/* Brand icon hover float */
+.brand-logo-wrap {
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease;
+}
+
+.brand-header:hover .brand-logo-wrap {
+  transform: translateY(-3px) rotate(-6deg) scale(1.08);
+  box-shadow: 0 6px 16px rgba(158, 71, 42, 0.35);
+}
+
+/* ----------------------------------------------------
+   4. INTERACTIVE 3D CARD TILT & HOVER SHINE
+   ---------------------------------------------------- */
+.card,
+.stat-card,
+.journal-card,
+.quote-card {
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), 
+              box-shadow 260ms ease, 
+              border-color 260ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover,
+.stat-card:hover,
+.journal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(45, 35, 25, 0.08), 0 2px 6px rgba(45, 35, 25, 0.04);
+}
+
+[data-theme="dark"] .card:hover,
+[data-theme="dark"] .stat-card:hover,
+[data-theme="dark"] .journal-card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Subtle gloss shine reflection moving across cards on hover */
+.card::after,
+.stat-card::after,
+.journal-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg, 
+    transparent 40%, 
+    rgba(255, 255, 255, 0.07) 50%, 
+    transparent 60%
+  );
+  transform: rotate(25deg) translateY(-100%);
+  transition: transform 700ms ease;
+  pointer-events: none;
+}
+
+.card:hover::after,
+.stat-card:hover::after,
+.journal-card:hover::after {
+  transform: rotate(25deg) translateY(100%);
+}
+
+/* ----------------------------------------------------
+   5. QUOTE BANNER PULSE & SHIMMER
+   ---------------------------------------------------- */
+.quote-card {
+  border-left-width: 4px;
+  transition: transform 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+
+.quote-card:hover {
+  transform: translateY(-2px);
+  border-left-color: var(--accent-hover);
+  box-shadow: 0 6px 20px rgba(158, 71, 42, 0.12);
+}
+
+.quote-mark {
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms ease;
+}
+
+.quote-card:hover .quote-mark {
+  transform: scale(1.2) rotate(-8deg);
+  opacity: 0.95;
+}
+
+@keyframes spinRefresh {
+  0% { transform: rotate(0deg) scale(1); }
+  40% { transform: rotate(180deg) scale(1.3); }
+  80% { transform: rotate(340deg) scale(0.95); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.quote-refresh-btn.spinning {
+  animation: spinRefresh 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes quoteFade {
+  0% { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.quote-text.animate-fade {
+  animation: quoteFade 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ----------------------------------------------------
+   6. TASK CHECKBOX & SPARKLE EXPLOSION
+   ---------------------------------------------------- */
+@keyframes checkSpring {
+  0% { transform: scale(0.4) rotate(-20deg); }
+  45% { transform: scale(1.35) rotate(10deg); }
+  75% { transform: scale(0.9) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.task-checkbox-btn {
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), 
+              background-color 220ms ease, 
+              border-color 220ms ease, 
+              box-shadow 220ms ease;
+}
+
+.task-checkbox-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(158, 71, 42, 0.2);
+}
+
+.task-checkbox-btn:active {
+  transform: scale(0.85);
+}
+
+.task-checkbox-btn.checked {
+  animation: checkSpring 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.task-checkbox-btn.checked svg {
+  animation: checkmarkDraw 260ms ease-out forwards;
+}
+
+@keyframes checkmarkDraw {
+  from {
+    stroke-dashoffset: 24;
+    stroke-dasharray: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 24;
+  }
+}
+
+/* Task row hover slide */
+.task-row,
+.full-task-row {
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 200ms ease, 
+              border-color 200ms ease, 
+              box-shadow 200ms ease;
+}
+
+.task-row:hover,
+.full-task-row:hover {
+  transform: translateX(4px);
+  border-color: var(--border-strong);
+}
+
+@keyframes taskCompletedFlash {
+  0% {
+    background-color: var(--accent-subtle);
+    transform: scale(1.01) translateX(4px);
+  }
+  50% {
+    background-color: var(--accent-subtle);
+  }
+  100% {
+    background-color: var(--bg-surface);
+    transform: scale(1) translateX(0);
+  }
+}
+
+.task-row.just-completed,
+.full-task-row.just-completed {
+  animation: taskCompletedFlash 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Strikethrough sweep line */
+.task-row.completed .task-title,
+.full-task-row.completed .task-title,
+.mit-item.completed .mit-text,
+.plan-mit-row.completed .mit-label {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  transition: color 250ms ease, opacity 250ms ease;
+}
+
+/* ----------------------------------------------------
+   7. THE RULE OF 3 (MIT) INTERACTION
+   ---------------------------------------------------- */
+.mit-item,
+.plan-mit-row {
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 220ms ease, 
+              box-shadow 220ms ease;
+}
+
+.mit-item:hover,
+.plan-mit-row:hover {
+  transform: translateX(5px) scale(1.005);
+  box-shadow: 0 4px 12px rgba(45, 35, 25, 0.05);
+  border-color: var(--accent-border);
+}
+
+.mit-number,
+.mit-rank {
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mit-item:hover .mit-number,
+.plan-mit-row:hover .mit-rank {
+  transform: scale(1.25);
+  color: var(--accent-hover);
+}
+
+/* ----------------------------------------------------
+   8. BUTTONS TACTILE FEEDBACK & GLOW
+   ---------------------------------------------------- */
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1), 
+              box-shadow 200ms ease, 
+              background-color 200ms ease, 
+              border-color 200ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: scale(0.95) translateY(1px);
+}
+
+.btn-primary {
+  box-shadow: 0 2px 6px rgba(158, 71, 42, 0.2);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 18px rgba(158, 71, 42, 0.35);
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(222, 117, 82, 0.45);
+}
+
+/* Sidebar quick buttons subtle breathing glow */
+.sidebar-action-btn.btn-primary {
+  animation: primaryBtnPulse 5s ease-in-out infinite;
+}
+
+@keyframes primaryBtnPulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(158, 71, 42, 0.18);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(158, 71, 42, 0.4);
+  }
+}
+
+/* Ripple click effect */
+.ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: rippleAnimation 550ms ease-out;
+  pointer-events: none;
+}
+
+@keyframes rippleAnimation {
+  to {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+/* ----------------------------------------------------
+   9. STREAK GLOW & FLAME PULSE
+   ---------------------------------------------------- */
+@keyframes flameBreathing {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px rgba(158, 71, 42, 0.2));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 10px rgba(222, 117, 82, 0.5));
+  }
+}
+
+.stat-card:nth-child(3) .stat-value {
+  display: inline-block;
+  animation: flameBreathing 3.2s ease-in-out infinite;
+}
+
+/* ----------------------------------------------------
+   10. PROGRESS BARS FLUID LIQUID GLIMMER
+   ---------------------------------------------------- */
+.progress-bar-fill {
+  transition: width 800ms cubic-bezier(0.34, 1.25, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.4) 50%, 
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: progressGlimmer 2.2s infinite;
+}
+
+@keyframes progressGlimmer {
+  0% { transform: translateX(-100%); }
+  45%, 100% { transform: translateX(100%); }
+}
+
+/* ----------------------------------------------------
+   11. SVG CHART BARS & SMOOTH LINE DRAWING
+   ---------------------------------------------------- */
+.daybook-svg-chart .chart-bar {
+  transform-origin: bottom;
+  animation: chartBarRise 750ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+
+@keyframes chartBarRise {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scaleY(1.06);
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.daybook-svg-chart path[stroke="var(--accent)"] {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: drawChartSmooth 1.3s cubic-bezier(0.16, 1, 0.3, 1) 200ms forwards;
+}
+
+@keyframes drawChartSmooth {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.daybook-svg-chart circle {
+  animation: popInNode 450ms cubic-bezier(0.34, 1.56, 0.64, 1) 750ms both;
+}
+
+@keyframes popInNode {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.4);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ----------------------------------------------------
+   12. CALENDAR CELLS HOVER POP & SELECTION WAVE
+   ---------------------------------------------------- */
+.cal-day-cell {
+  transition: transform 200ms cubic-bezier(0.34, 1.4, 0.64, 1), 
+              border-color 200ms ease, 
+              background-color 200ms ease, 
+              box-shadow 200ms ease;
+}
+
+.cal-day-cell:hover:not(.cal-day-outside) {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 4px 14px rgba(45, 35, 25, 0.08);
+  border-color: var(--border-strong);
+  z-index: 2;
+}
+
+.cal-day-cell.cal-day-selected {
+  animation: calendarCellSelect 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes calendarCellSelect {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.cal-indicator-chip {
+  transition: transform 180ms ease;
+}
+
+.cal-day-cell:hover .cal-indicator-chip {
+  transform: scale(1.08);
+}
+
+/* ----------------------------------------------------
+   13. JOURNAL TIMELINE CARDS ENTRANCE & HOVER
+   ---------------------------------------------------- */
+.journal-card {
+  animation: cardPopIn 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.journal-card:nth-child(1) { animation-delay: 40ms; }
+.journal-card:nth-child(2) { animation-delay: 90ms; }
+.journal-card:nth-child(3) { animation-delay: 140ms; }
+.journal-card:nth-child(4) { animation-delay: 190ms; }
+.journal-card:nth-child(5) { animation-delay: 240ms; }
+.journal-card:nth-child(6) { animation-delay: 290ms; }
+
+.journal-card:hover .journal-card-thumbnail {
+  transform: scale(1.03);
+}
+
+.journal-card-thumbnail {
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.journal-card-img-wrap {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+/* ----------------------------------------------------
+   14. REFLECTION PROMPT CHIPS BOUNCE & GLOW
+   ---------------------------------------------------- */
+.prompt-chip {
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), 
+              background-color 180ms ease, 
+              border-color 180ms ease, 
+              color 180ms ease, 
+              box-shadow 180ms ease;
+}
+
+.prompt-chip:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 4px 12px rgba(158, 71, 42, 0.15);
+  border-color: var(--accent);
+}
+
+.prompt-chip:active {
+  transform: scale(0.94);
+}
+
+/* ----------------------------------------------------
+   15. SIDEBAR NAVIGATION HOVER & ACTIVE SLIDE
+   ---------------------------------------------------- */
+.sidebar-nav-btn {
+  position: relative;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 200ms ease, 
+              color 200ms ease;
+}
+
+.sidebar-nav-btn::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 4px;
+  height: 65%;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sidebar-nav-btn.active::before {
+  transform: translateY(-50%) scaleY(1);
+}
+
+.sidebar-nav-btn:hover {
+  transform: translateX(5px);
+}
+
+.sidebar-nav-btn:hover .nav-icon {
+  transform: scale(1.15) rotate(4deg);
+}
+
+.nav-icon {
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Theme toggle button spin */
+.theme-toggle-btn {
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 200ms ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: rotate(30deg) scale(1.12);
+}
+
+/* ----------------------------------------------------
+   16. CELEBRATION PARTICLE CANNON
+   ---------------------------------------------------- */
+.celebration-particle-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.paper-confetti {
+  position: absolute;
+  width: 8px;
+  height: 14px;
+  opacity: 1;
+  border-radius: 2px;
+  animation: confettiExplode 1.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+
+@keyframes confettiExplode {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1.2);
+  }
+  60% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--deltaX, 30px), var(--deltaY, 160px)) rotate(var(--rot, 540deg)) scale(0.4);
+  }
+}
+
+/* Sparkle stars */
+.sparkle-star {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  animation: sparkleFloat 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes sparkleFloat {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.3) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(var(--deltaX), var(--deltaY)) scale(1.4) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--deltaX), calc(var(--deltaY) + 40px)) scale(0.2) rotate(360deg);
+  }
+}
+
+/* ----------------------------------------------------
+   17. NUMBER COUNTER ANIMATION EFFECT
+   ---------------------------------------------------- */
+.stat-value {
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stat-card:hover .stat-value {
+  transform: scale(1.06);
+}

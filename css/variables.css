@@ -1,0 +1,135 @@
+/* Daybook Design Tokens & Theming */
+
+:root,
+[data-theme="light"] {
+  /* Canvas & Paper Tones */
+  --bg-canvas: #FBF9F5;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-subtle: #F5F1EA;
+  --bg-hover: #F2ECE2;
+  
+  /* Borders */
+  --border: #EAE4DB;
+  --border-subtle: #F2EDE6;
+  --border-strong: #D1C7B8;
+
+  /* Ink & Typography */
+  --text-primary: #23211F;
+  --text-secondary: #5C564E;
+  --text-muted: #827C72;
+  --text-light: #ABA396;
+
+  /* Primary Accent: Terracotta / Hand-stitched Leather */
+  --accent: #9E472A;
+  --accent-hover: #83391F;
+  --accent-subtle: #FAF0EB;
+  --accent-border: #E8CAC0;
+  --accent-contrast: #FFFFFF;
+
+  /* Chart & Bar Track */
+  --color-bar-bg: #EAE3D8;
+
+  /* Priority Tokens */
+  --prio-high-bg: #FDF2F0;
+  --prio-high-text: #B3261E;
+  --prio-high-border: #F6C8C2;
+
+  --prio-med-bg: #FEF7EC;
+  --prio-med-text: #966720;
+  --prio-med-border: #F7E2BD;
+
+  --prio-low-bg: #F1F6F3;
+  --prio-low-text: #39674E;
+  --prio-low-border: #C8E0D2;
+
+  /* Category Accents */
+  --cat-work: #455A64;
+  --cat-personal: #9E472A;
+  --cat-study: #2B5B84;
+  --cat-health: #436A57;
+  --cat-creative: #8E44AD;
+
+  /* Elevations */
+  --shadow-sm: 0 1px 2px rgba(45, 35, 25, 0.04);
+  --shadow-card: 0 1px 3px rgba(45, 35, 25, 0.05), 0 6px 16px rgba(45, 35, 25, 0.02);
+  --shadow-elevated: 0 4px 12px rgba(45, 35, 25, 0.08), 0 16px 32px rgba(45, 35, 25, 0.04);
+  --shadow-modal: 0 16px 48px rgba(35, 25, 15, 0.16), 0 4px 16px rgba(35, 25, 15, 0.08);
+
+  /* Fonts */
+  --font-serif: 'Newsreader', Garamond, Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Spacing & Radii */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* Sidebar dimensions */
+  --sidebar-width: 260px;
+  --header-height-mobile: 56px;
+  --max-content-width: 1140px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] {
+  /* Canvas & Paper Tones (Warm Deep Espresso) */
+  --bg-canvas: #161514;
+  --bg-surface: #201E1C;
+  --bg-surface-elevated: #282522;
+  --bg-subtle: #242220;
+  --bg-hover: #2E2B27;
+
+  /* Borders */
+  --border: #332F2B;
+  --border-subtle: #292622;
+  --border-strong: #4B453E;
+
+  /* Ink & Typography */
+  --text-primary: #EDE7DF;
+  --text-secondary: #AEA59A;
+  --text-muted: #827A70;
+  --text-light: #57524A;
+
+  /* Primary Accent: Burnt Ember */
+  --accent: #DE7552;
+  --accent-hover: #E8896A;
+  --accent-subtle: #2B1E19;
+  --accent-border: #563325;
+  --accent-contrast: #161514;
+
+  /* Chart & Bar Track */
+  --color-bar-bg: #332F2B;
+
+  /* Priority Tokens */
+  --prio-high-bg: #2E1B19;
+  --prio-high-text: #F28B82;
+  --prio-high-border: #562723;
+
+  --prio-med-bg: #2B2317;
+  --prio-med-text: #FDD663;
+  --prio-med-border: #543E19;
+
+  --prio-low-bg: #1B2921;
+  --prio-low-text: #81C995;
+  --prio-low-border: #2B4E38;
+
+  /* Category Accents */
+  --cat-work: #78909C;
+  --cat-personal: #DE7552;
+  --cat-study: #5C93C4;
+  --cat-health: #66BB6A;
+  --cat-creative: #BA68C8;
+
+  /* Elevations */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 6px 16px rgba(0, 0, 0, 0.25);
+  --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 32px rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.65), 0 6px 20px rgba(0, 0, 0, 0.4);
+}
