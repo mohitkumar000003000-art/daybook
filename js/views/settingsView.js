@@ -144,20 +144,17 @@ export class SettingsView {
             <div class="card-header">
               <div class="card-title-group">
                 <span class="card-eyebrow">Reset Options</span>
-                <h2 class="card-title">Sample Data & Reset</h2>
+                <h2 class="card-title">Clean Slate & Reset</h2>
               </div>
             </div>
 
             <p class="card-description">
-              Reload the curated demonstration tasks and journal reflections, or clear all records to start completely fresh.
+              Reset your Daybook to a completely clean workspace, erasing all saved tasks, journal entries, and time blocks.
             </p>
 
             <div class="danger-actions-row">
-              <button class="btn btn-secondary" id="reload-demo-btn">
-                Reload Demo Data
-              </button>
               <button class="btn btn-danger" id="clear-all-data-btn">
-                Clear All Data
+                Clear All Data & Start Fresh
               </button>
             </div>
           </div>
@@ -279,22 +276,7 @@ export class SettingsView {
       reader.readAsText(file);
     });
 
-    // Reload demo data
-    this.container.querySelector('#reload-demo-btn')?.addEventListener('click', async () => {
-      const confirmed = await modal.confirm({
-        title: 'Reload Demo Data',
-        message: 'This will reset your tasks and reflections to the curated demonstration dataset. Proceed?',
-        confirmText: 'Reload Demo Data',
-        isDestructive: false
-      });
-      if (confirmed) {
-        store.resetToDemoData();
-        toast.success('Demo data restored');
-        this.render();
-      }
-    });
-
-    // Clear all data
+    // Clear all data & start fresh
     this.container.querySelector('#clear-all-data-btn')?.addEventListener('click', async () => {
       const confirmed = await modal.confirm({
         title: 'Clear All Data',

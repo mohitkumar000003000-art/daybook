@@ -46,54 +46,34 @@ export function showOnboardingModal(onComplete) {
         Your private daily planner, focus anchor, and reflective journal. Designed for intentional living with zero tracking.
       </p>
 
-      <div class="onboarding-choices-grid">
-        <!-- Option 1: Start Fresh -->
-        <div class="onboarding-card onboarding-card-fresh" id="onboarding-start-fresh-card">
+      <div class="onboarding-single-choice">
+        <div class="onboarding-card onboarding-card-fresh w-100" id="onboarding-start-fresh-card">
           <div class="choice-icon-wrap fresh-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2v20M2 12h20"/>
             </svg>
           </div>
           <div class="choice-info">
-            <div class="choice-header-row">
-              <h3 class="choice-title">Start Fresh</h3>
-              <span class="choice-badge badge-recommended">Recommended</span>
-            </div>
+            <h3 class="choice-title">Clean Slate Workspace</h3>
             <p class="choice-desc">
-              Begin with a clean, empty Daybook. No demo tasks, no sample reflections, no dummy stats—purely yours.
+              Your Daybook starts completely clean. Zero pre-filled tasks, zero sample entries, and no dummy statistics. You have total creative freedom.
             </p>
           </div>
-          <button type="button" class="btn btn-primary onboarding-btn" id="onboarding-btn-fresh">
-            Start Fresh Workspace
-          </button>
-        </div>
-
-        <!-- Option 2: Explore Demo -->
-        <div class="onboarding-card onboarding-card-demo" id="onboarding-explore-demo-card">
-          <div class="choice-icon-wrap demo-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-            </svg>
-          </div>
-          <div class="choice-info">
-            <div class="choice-header-row">
-              <h3 class="choice-title">Explore Demo</h3>
-              <span class="choice-badge badge-sample">Sample Data</span>
-            </div>
-            <p class="choice-desc">
-              Preview Daybook with realistic sample tasks, time-blocks, and journal entries. Clearly labeled as demo content.
-            </p>
-          </div>
-          <button type="button" class="btn btn-secondary onboarding-btn" id="onboarding-btn-demo">
-            Explore with Demo Data
-          </button>
         </div>
       </div>
 
-      <div class="onboarding-footer">
+      <div class="onboarding-name-prompt w-100" style="margin-top: 18px; text-align: left;">
+        <label for="onboarding-name-input" class="form-label">What should Daybook call you? (Optional)</label>
+        <input type="text" id="onboarding-name-input" class="form-input" placeholder="Your name or pen name (e.g., Mohit)" maxlength="30" />
+      </div>
+
+      <button type="button" class="btn btn-primary onboarding-btn w-100" id="onboarding-btn-fresh" style="margin-top: 20px; font-size: 1rem; padding: 12px 20px;">
+        Start My Daybook
+      </button>
+
+      <div class="onboarding-footer" style="margin-top: 20px;">
         <p class="onboarding-privacy-note">
-          🔒 <strong>100% Private by default.</strong> Everything stays in your browser’s local storage. You can switch between fresh or demo anytime in Settings.
+          🔒 <strong>100% Private by default.</strong> Everything stays in your browser’s local storage on this device.
         </p>
       </div>
     </div>
@@ -111,33 +91,28 @@ export function showOnboardingModal(onComplete) {
     }, 200);
   };
 
-  // Choice: Start Fresh
+  // Start Clean
   const handleStartFresh = (e) => {
     localStorage.setItem('daybook_onboarding_completed', 'true');
+    const nameInput = overlay.querySelector('#onboarding-name-input');
+    const enteredName = nameInput ? nameInput.value.trim() : '';
+
     store.clearAllData();
+    if (enteredName) {
+      store.updateUserSettings({ name: enteredName });
+    }
+
     closeOnboarding();
-    firePaperConfetti(e?.clientX || window.innerWidth / 2, e?.clientY || window.innerHeight * 0.4, 25);
-    toast.success('Welcome to Daybook! Your clean workspace is ready.');
+    firePaperConfetti(e?.clientX || window.innerWidth / 2, e?.clientY || window.innerHeight * 0.4, 30);
+    toast.success(enteredName ? `Welcome to Daybook, ${enteredName}!` : 'Welcome to Daybook! Your clean workspace is ready.');
     if (onComplete) onComplete('fresh');
   };
 
-  // Choice: Explore Demo
-  const handleExploreDemo = (e) => {
-    localStorage.setItem('daybook_onboarding_completed', 'true');
-    store.resetToDemoData();
-    closeOnboarding();
-    firePaperConfetti(e?.clientX || window.innerWidth / 2, e?.clientY || window.innerHeight * 0.4, 30);
-    toast.info('Demo content loaded. Explore all features or clear anytime in Settings.');
-    if (onComplete) onComplete('demo');
-  };
-
   overlay.querySelector('#onboarding-btn-fresh')?.addEventListener('click', handleStartFresh);
-  overlay.querySelector('#onboarding-start-fresh-card')?.addEventListener('click', (e) => {
-    if (e.target.id !== 'onboarding-btn-fresh') handleStartFresh(e);
-  });
-
-  overlay.querySelector('#onboarding-btn-demo')?.addEventListener('click', handleExploreDemo);
-  overlay.querySelector('#onboarding-explore-demo-card')?.addEventListener('click', (e) => {
-    if (e.target.id !== 'onboarding-btn-demo') handleExploreDemo(e);
+  overlay.querySelector('#onboarding-name-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleStartFresh(e);
+    }
   });
 }

@@ -19,6 +19,18 @@ class Store {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
+        // If stored data contains the legacy demo "Alex" seed or legacy tasks, upgrade to clean state
+        const isLegacyDemo = parsed && (
+          (parsed.user && parsed.user.name === 'Alex') ||
+          (Array.isArray(parsed.tasks) && parsed.tasks.some(t => t.id === 'task-1' || t.id === 'task-2'))
+        );
+        if (isLegacyDemo) {
+          console.info('Upgraded legacy demo dataset to clean Daybook workspace.');
+          const cleanState = this.getCleanEmptyState();
+          this.saveToStorage(cleanState);
+          return cleanState;
+        }
+
         // Ensure standard structure exists
         if (parsed && parsed.tasks && parsed.journalEntries) {
           return parsed;
