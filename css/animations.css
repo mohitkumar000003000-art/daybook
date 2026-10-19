@@ -691,3 +691,173 @@ body::before {
 .stat-card:hover .stat-value {
   transform: scale(1.06);
 }
+
+/* ====================================================
+   18. MOBILE-FIRST FLUID MOTION & DYNAMIC APP FEEL
+   ==================================================== */
+
+/* Smooth spring active press on all cards, buttons, and navigation items */
+.btn:active,
+.mobile-nav-item:active,
+.stat-card:active,
+.card:active,
+.task-row:active,
+.mit-item:active,
+.action-btn:active {
+  transform: scale(0.968) !important;
+  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.4, 1) !important;
+}
+
+/* Quick Add button glowing aura and heartbeat spring */
+@keyframes quickPulse {
+  0% {
+    box-shadow: 0 4px 14px rgba(158, 71, 42, 0.4), 0 0 0 0 rgba(158, 71, 42, 0.35);
+  }
+  70% {
+    box-shadow: 0 6px 20px rgba(158, 71, 42, 0.5), 0 0 0 10px rgba(158, 71, 42, 0);
+  }
+  100% {
+    box-shadow: 0 4px 14px rgba(158, 71, 42, 0.4), 0 0 0 0 rgba(158, 71, 42, 0);
+  }
+}
+
+.m-nav-quick-plus {
+  animation: quickPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mobile-nav-quick-add:active .m-nav-quick-plus {
+  transform: scale(0.88) rotate(45deg);
+}
+
+/* Mobile Bottom Navigation active bounce & icon float */
+.mobile-nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-nav-item.active .m-nav-icon {
+  animation: navBounce 380ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  color: var(--accent);
+}
+
+.mobile-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  width: 14px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  animation: pillSlide 240ms ease-out forwards;
+}
+
+@keyframes navBounce {
+  0% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-4px) scale(1.18); }
+  100% { transform: translateY(-1px) scale(1.08); }
+}
+
+@keyframes pillSlide {
+  from { width: 0; opacity: 0; }
+  to { width: 14px; opacity: 1; }
+}
+
+/* Card shimmer on scroll into view */
+.card,
+.stat-card,
+.quote-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before,
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.14) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+  animation: subtleShimmer 9s infinite 2s ease-in-out;
+}
+
+[data-theme="dark"] .card::before,
+[data-theme="dark"] .stat-card::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+}
+
+@keyframes subtleShimmer {
+  0% { left: -120%; }
+  18% { left: 160%; }
+  100% { left: 160%; }
+}
+
+/* Checkbox celebratory pop on completion */
+.task-checkbox-btn {
+  transition: transform 220ms cubic-bezier(0.34, 1.6, 0.64, 1), background-color 180ms ease, border-color 180ms ease;
+}
+
+.task-checkbox-btn:active {
+  transform: scale(0.85);
+}
+
+.task-checkbox-btn.checked {
+  animation: checkboxPop 350ms cubic-bezier(0.34, 1.6, 0.64, 1) forwards;
+}
+
+@keyframes checkboxPop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
+/* Smooth staggering in lists on mobile */
+.mit-item {
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 220ms ease;
+}
+
+.mit-item:hover,
+.mit-item:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 35, 25, 0.06);
+}
+
+/* Floating subtle animation for quote cards */
+.quote-card {
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 280ms ease;
+}
+
+.quote-card:active {
+  transform: scale(0.985);
+}
+
+/* Page fade-in-up transition */
+.view-content {
+  animation: mobileSlideUp 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes mobileSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
