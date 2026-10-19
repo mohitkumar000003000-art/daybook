@@ -23,6 +23,28 @@
   <link rel="stylesheet" href="css/daily-plan.css" />
   <link rel="stylesheet" href="css/progress.css" />
   <link rel="stylesheet" href="css/animations.css" />
+
+  <style>
+    /* Suppress Netlify badge and drawer injection */
+    netlify-drawer,
+    #netlify-badge,
+    .netlify-badge,
+    [data-netlify-deploy-id],
+    [aria-label*="Netlify"],
+    [class*="netlify"],
+    div[style*="z-index: 10000"],
+    div[style*="z-index: 99999"] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      height: 0 !important;
+      width: 0 !important;
+      position: fixed !important;
+      bottom: -9999px !important;
+      right: -9999px !important;
+    }
+  </style>
 </head>
 <body>
   <!-- Mobile Header Bar -->

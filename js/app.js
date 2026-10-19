@@ -400,21 +400,44 @@ class App {
 
   suppressPlatformBadges() {
     const purge = () => {
-      document.querySelectorAll('#nl-badge, .nl-badge, [aria-label*="Netlify"], [id*="netlify"], [class*="netlify-badge"]').forEach(el => {
-        el.remove();
+      // 1. Remove standard and custom Netlify elements
+      const selectors = [
+        'netlify-drawer',
+        '#nl-badge',
+        '.nl-badge',
+        '#netlify-badge',
+        '.netlify-badge',
+        '[data-netlify-deploy-id]',
+        '[aria-label*="Netlify"]',
+        '[class*="netlify"]',
+        '[id*="netlify"]'
+      ];
+
+      document.querySelectorAll(selectors.join(', ')).forEach(el => el.remove());
+
+      // 2. Scan all bottom-right positioned anchors or buttons with text or links related to Netlify
+      document.querySelectorAll('a, button, div, span').forEach(el => {
+        const text = (el.innerText || el.textContent || '').trim().toLowerCase();
+        if (text.includes('powered by netlify') || text === 'netlify') {
+          el.remove();
+        }
       });
-      // Also check any anchors with netlify href in bottom corner
-      document.querySelectorAll('a[href*="netlify.com"], a[href*="netlify.app"]').forEach(a => {
-        if (a.textContent.toLowerCase().includes('netlify')) {
-          a.style.setProperty('display', 'none', 'important');
-          a.remove();
+
+      // 3. Purge elements containing shadowRoots
+      document.querySelectorAll('*').forEach(el => {
+        if (el.shadowRoot) {
+          const shadowBadge = el.shadowRoot.querySelector('[aria-label*="Netlify"], .netlify-badge, a[href*="netlify"]');
+          if (shadowBadge) {
+            el.remove();
+          }
         }
       });
     };
 
     purge();
     const observer = new MutationObserver(() => purge());
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    setInterval(purge, 800);
   }
 }
 
