@@ -365,27 +365,57 @@
 
 /* Mobile Responsiveness for Tasks */
 @media (max-width: 768px) {
+  .tasks-view {
+    gap: 14px;
+  }
+
+  /* Compact quick add bar */
+  .quick-add-task-bar {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .quick-add-task-bar #quick-task-submit {
+    padding: 6px 12px;
+    min-height: 38px;
+  }
+
   .tasks-tabs-row {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: stretch;
+    gap: 10px;
+    padding-bottom: 8px;
   }
 
   .tab-pills {
     width: 100%;
     overflow-x: auto;
     padding-bottom: 4px;
+    gap: 4px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tab-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    min-height: 36px;
   }
 
   .tab-progress-summary {
     width: 100%;
+    display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding-top: 4px;
   }
 
   .tab-progress-bar {
-    flex: 1;
-    max-width: 140px;
+    flex: 0 0 100px;
   }
 
   .tasks-filter-toolbar {
@@ -397,51 +427,98 @@
   .search-box {
     width: 100%;
     min-width: 0;
+    padding: 8px 12px;
   }
 
   .category-filter-scroll {
     width: 100%;
     overflow-x: auto;
     padding-bottom: 4px;
+    gap: 6px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
 
+  .category-filter-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-pill {
+    padding: 6px 12px;
+    font-size: 0.76rem;
+    min-height: 34px;
+  }
+
+  /* Two clean dropdowns side-by-side */
   .filter-dropdowns {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
     width: 100%;
+    margin-left: 0;
   }
 
   .filter-dropdowns .form-select {
-    flex: 1;
+    width: 100%;
     min-width: 0;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    background-color: var(--bg-surface);
+  }
+
+  .tasks-container {
+    padding: 12px;
+  }
+
+  /* Optimized full task row for touch */
+  .full-task-row {
+    padding: 12px 10px;
+    gap: 10px;
+  }
+
+  .task-checkbox-btn {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
   }
 
   .task-row-actions {
     opacity: 1; /* Always visible on touch screens */
+    gap: 6px;
   }
 
-  .full-task-row {
-    padding: 12px 10px;
-  }
-
-  .quick-add-task-bar {
-    padding: 8px 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .filter-dropdowns {
-    flex-direction: column;
-  }
-
-  .filter-dropdowns .form-select {
-    width: 100%;
+  .task-row-actions .icon-btn {
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .task-meta-tags {
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .view-header-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .filter-dropdowns {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .quick-add-input-wrap input {
+    font-size: 0.86rem;
+  }
+
+  .tasks-container {
+    padding: 10px 8px;
   }
 }
 

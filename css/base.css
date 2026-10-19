@@ -188,26 +188,37 @@ a:hover {
   letter-spacing: -0.02em;
 }
 
-/* Responsive Breakpoints */
 @media (max-width: 900px) {
   .mobile-top-bar {
     display: flex;
   }
 
   .app-main-content {
-    padding: calc(var(--header-height-mobile) + 16px) 16px 84px 16px;
+    padding: calc(var(--header-height-mobile) + 16px) 16px 90px 16px;
   }
 
   .view-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 20px;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 18px;
     padding-bottom: 16px;
   }
 
+  .view-header-title {
+    width: 100%;
+  }
+
+  .view-header-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
   .page-title {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
+    word-break: break-word;
   }
 }
 
