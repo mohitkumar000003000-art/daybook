@@ -9,7 +9,12 @@ import { store } from '../store.js';
 import { modal } from './modal.js';
 import { toast } from './toast.js';
 import { firePaperConfetti } from '../utils/confetti.js';
-import { signInWithGooglePopup, signInWithGoogleRedirect, isFirebaseConfigured } from '../services/firebaseConfig.js';
+import { 
+  authenticateWithGoogle, 
+  signInWithGoogleRedirect, 
+  isFirebaseConfigured, 
+  isMobileOrTouchDevice 
+} from '../services/firebaseConfig.js';
 
 export const GOOGLE_LOGO_SVG = `
 <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -106,22 +111,26 @@ export function openGoogleSignInModal(onSuccess = null) {
 
         try {
           if (isFirebaseConfigured()) {
+            if (isMobileOrTouchDevice()) {
+              toast.info('Connecting to Google Sign-In...');
+              await signInWithGoogleRedirect();
+              return;
+            }
+
             toast.info('Opening Google Sign-In...');
-            const result = await signInWithGooglePopup();
+            const result = await authenticateWithGoogle();
             if (result.success) {
               handleLogin(result.user.name, result.user.email, 'google', result.user.avatarUrl);
               return;
+            } else if (result.redirected) {
+              toast.info('Redirecting to Google Sign-In...');
             } else if (result.code === 'in_progress') {
               toast.info('Google window is already open. Please check your open windows.');
-            } else if (result.code === 'auth/popup-blocked') {
-              toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
-              await signInWithGoogleRedirect();
-            } else if (result.code === 'auth/popup-closed-by-user') {
-              toast.info('Sign-in window closed. Click again when ready.');
             } else if (result.code === 'auth/cancelled-popup-request') {
               // Ignore duplicate click noise
             } else {
-              toast.error(result.message || 'Failed to authenticate with Google');
+              toast.info('Redirecting to Google Sign-In...');
+              await signInWithGoogleRedirect();
             }
           } else {
             // Firebase not yet configured with user's keys - offer mock sign-in with clear notification

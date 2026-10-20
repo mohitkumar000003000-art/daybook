@@ -9,17 +9,39 @@ import {
   onAuthStateChanged 
 } from 'firebase/auth';
 
+function getAuthDomain() {
+  if (typeof window !== 'undefined' && window.location.hostname) {
+    const host = window.location.hostname;
+    if (host.endsWith('.web.app') || host.endsWith('.firebaseapp.com')) {
+      return host;
+    }
+  }
+  return import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "daybook-ddc79.firebaseapp.com";
+}
+
 /**
  * Firebase Project Configuration
  */
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDplbhh8dB5Zw8sMgi-39sQroTUyCpnlPk",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "daybook-ddc79.firebaseapp.com",
+  authDomain: getAuthDomain(),
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "daybook-ddc79",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "daybook-ddc79.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "248264696451",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:248264696451:web:5002292f099de7eae9f1b6"
 };
+
+/**
+ * Checks if the current browser environment is mobile, tablet, or touch-emulated
+ */
+export function isMobileOrTouchDevice() {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  const isTouch = Boolean(navigator.maxTouchPoints && navigator.maxTouchPoints > 0) || ('ontouchstart' in window);
+  const isSmallScreen = window.innerWidth <= 1024;
+  return isMobileUA || (isTouch && isSmallScreen);
+}
 
 /**
  * Checks whether valid Firebase credentials have been configured
@@ -117,6 +139,43 @@ export async function signInWithGoogleRedirect() {
 }
 
 /**
+ * Unified Google Sign-in helper
+ * Automatically chooses the best flow (redirect on mobile/tablet or popup with redirect fallback on desktop)
+ */
+export async function authenticateWithGoogle(options = {}) {
+  const { forceRedirect = false, preferRedirect = false } = options;
+
+  if (!isFirebaseConfigured()) {
+    return {
+      success: false,
+      unconfigured: true,
+      message: 'Firebase is not yet configured.'
+    };
+  }
+
+  // 1. Mobile, tablet, or touch-emulation viewports work best with direct redirect
+  if (forceRedirect || preferRedirect || isMobileOrTouchDevice()) {
+    await signInWithGoogleRedirect();
+    return { redirected: true };
+  }
+
+  // 2. Desktop: try popup first
+  const res = await signInWithGooglePopup();
+  if (res.success) {
+    return res;
+  }
+
+  // 3. Fallback: if browser blocked or closed popup, switch seamlessly to redirect
+  if (res.code === 'auth/popup-blocked' || res.code === 'auth/popup-closed-by-user') {
+    console.info('Popup unavailable, proceeding with direct Google redirect...');
+    await signInWithGoogleRedirect();
+    return { redirected: true };
+  }
+
+  return res;
+}
+
+/**
  * Sign out of Firebase session
  */
 export async function signOutFirebase() {
@@ -149,6 +208,7 @@ export function initFirebaseAuthListener(onUserChanged) {
           email: u.email,
           avatarUrl: u.photoURL || '',
           provider: 'google',
+          isRedirectReturn: true,
           lastSynced: new Date().toISOString()
         });
       }

@@ -152,8 +152,6 @@ class App {
     this.navigate('dashboard');
     attachButtonRipples(document.body);
 
-    // Suppress any platform badge injection (e.g. Netlify badge)
-    this.suppressPlatformBadges();
 
     // 9. Check first-run onboarding
     if (shouldShowOnboarding()) {
@@ -168,6 +166,9 @@ class App {
       store.signInWithGoogle(firebaseUser);
       this.updateSidebarUserProfile();
       this.renderCurrentView();
+      if (firebaseUser.isRedirectReturn) {
+        toast.success(`Welcome to Daybook, ${firebaseUser.name || firebaseUser.email}!`);
+      }
     });
   }
 
@@ -518,55 +519,6 @@ class App {
     this.sidebarOverlay?.classList.remove('visible');
   }
 
-  suppressPlatformBadges() {
-    const purge = () => {
-      // 1. Remove standard and custom Netlify elements and any injected iframes
-      const selectors = [
-        'iframe',
-        'netlify-drawer',
-        '#nl-badge',
-        '.nl-badge',
-        '#netlify-badge',
-        '.netlify-badge',
-        '[data-netlify-deploy-id]',
-        '[aria-label*="Netlify" i]',
-        '[aria-label*="Powered by Netlify" i]',
-        '[class*="netlify" i]',
-        '[id*="netlify" i]'
-      ];
-
-      document.querySelectorAll(selectors.join(', ')).forEach(el => {
-        try { el.remove(); } catch (e) {}
-      });
-
-      // 2. Scan all bottom/floating elements with text related to Netlify
-      document.querySelectorAll('a, button, div, span, footer').forEach(el => {
-        try {
-          const text = (el.innerText || el.textContent || '').trim().toLowerCase();
-          if (text.includes('powered by netlify') || text === 'netlify' || (text.includes('powered by') && text.includes('netlify'))) {
-            el.remove();
-          }
-        } catch (e) {}
-      });
-
-      // 3. Purge elements containing shadowRoots
-      document.querySelectorAll('*').forEach(el => {
-        try {
-          if (el.shadowRoot) {
-            const shadowBadge = el.shadowRoot.querySelector('netlify-drawer, [aria-label*="Netlify" i], .netlify-badge, a[href*="netlify"], iframe[src*="netlify"]');
-            if (shadowBadge) {
-              el.remove();
-            }
-          }
-        } catch (e) {}
-      });
-    };
-
-    purge();
-    const observer = new MutationObserver(() => purge());
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    setInterval(purge, 300);
-  }
 }
 
 function escapeHtml(str) {

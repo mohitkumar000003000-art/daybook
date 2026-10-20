@@ -9,7 +9,13 @@ import { store } from '../store.js';
 import { toast } from './toast.js';
 import { firePaperConfetti } from '../utils/confetti.js';
 import { GOOGLE_LOGO_SVG } from './googleAuthModal.js';
-import { signInWithGooglePopup, signInWithGoogleRedirect, isFirebaseConfigured, signOutFirebase } from '../services/firebaseConfig.js';
+import { 
+  authenticateWithGoogle, 
+  signInWithGoogleRedirect, 
+  isFirebaseConfigured, 
+  isMobileOrTouchDevice,
+  signOutFirebase 
+} from '../services/firebaseConfig.js';
 
 export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
   const user = store.getUserSettings();
@@ -127,8 +133,14 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
 
     try {
       if (isFirebaseConfigured()) {
+        if (isMobileOrTouchDevice()) {
+          toast.info('Connecting to Google Sign-In...');
+          await signInWithGoogleRedirect();
+          return;
+        }
+
         toast.info('Opening Google Sign-In...');
-        const result = await signInWithGooglePopup();
+        const result = await authenticateWithGoogle();
         if (result.success) {
           store.signInWithGoogle({
             email: result.user.email,
@@ -139,17 +151,15 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
           firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.4, 30);
           toast.success(`Signed in with Google as ${result.user.name || result.user.email}`);
           if (onAuthSuccess) onAuthSuccess();
+        } else if (result.redirected) {
+          toast.info('Redirecting to Google Sign-In...');
         } else if (result.code === 'in_progress') {
           toast.info('Google window is already open. Please check your open windows.');
-        } else if (result.code === 'auth/popup-blocked') {
-          toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
-          await signInWithGoogleRedirect();
-        } else if (result.code === 'auth/popup-closed-by-user') {
-          toast.info('Sign-in cancelled. Click again when ready.');
         } else if (result.code === 'auth/cancelled-popup-request') {
           // Ignore duplicate click noise
         } else {
-          toast.error(result.message || 'Failed to authenticate with Google');
+          toast.info('Redirecting to Google Sign-In...');
+          await signInWithGoogleRedirect();
         }
       } else {
         // Firebase credentials pending: inform user and allow local demo
