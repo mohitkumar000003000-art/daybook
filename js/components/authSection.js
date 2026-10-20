@@ -121,45 +121,58 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
 
   // Handle "Sign in with Google"
   googleBtn?.addEventListener('click', async (e) => {
-    if (isFirebaseConfigured()) {
-      toast.info('Opening Google Sign-In...');
-      const result = await signInWithGooglePopup();
-      if (result.success) {
-        store.signInWithGoogle({
-          email: result.user.email,
-          name: result.user.name,
-          provider: 'google',
-          avatarUrl: result.user.avatarUrl || ''
-        });
-        firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.4, 30);
-        toast.success(`Signed in with Google as ${result.user.email}`);
-        if (onAuthSuccess) onAuthSuccess();
-      } else if (result.code === 'auth/popup-blocked') {
-        toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
-        await signInWithGoogleRedirect();
-      } else if (result.code === 'auth/popup-closed-by-user') {
-        toast.info('Sign-in cancelled. Click again when ready.');
+    if (googleBtn.disabled) return;
+    googleBtn.disabled = true;
+    googleBtn.style.opacity = '0.7';
+
+    try {
+      if (isFirebaseConfigured()) {
+        toast.info('Opening Google Sign-In...');
+        const result = await signInWithGooglePopup();
+        if (result.success) {
+          store.signInWithGoogle({
+            email: result.user.email,
+            name: result.user.name,
+            provider: 'google',
+            avatarUrl: result.user.avatarUrl || ''
+          });
+          firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.4, 30);
+          toast.success(`Signed in with Google as ${result.user.name || result.user.email}`);
+          if (onAuthSuccess) onAuthSuccess();
+        } else if (result.code === 'in_progress') {
+          toast.info('Google window is already open. Please check your open windows.');
+        } else if (result.code === 'auth/popup-blocked') {
+          toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
+          await signInWithGoogleRedirect();
+        } else if (result.code === 'auth/popup-closed-by-user') {
+          toast.info('Sign-in cancelled. Click again when ready.');
+        } else if (result.code === 'auth/cancelled-popup-request') {
+          // Ignore duplicate click noise
+        } else {
+          toast.error(result.message || 'Failed to authenticate with Google');
+        }
       } else {
-        toast.error(result.message || 'Failed to authenticate with Google');
+        // Firebase credentials pending: inform user and allow local demo
+        toast.info('Firebase keys not configured yet. Using local profile simulation.');
+        const user = store.getUserSettings();
+        const googleEmail = user.googleAccount?.email || 'alex.henderson@gmail.com';
+        const googleName = user.googleAccount?.name || user.name || 'Alex Henderson';
+
+        store.signInWithGoogle({
+          email: googleEmail,
+          name: googleName,
+          provider: 'google',
+          avatarUrl: ''
+        });
+
+        firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.4, 30);
+        toast.success(`Signed in with Google as ${googleEmail}`);
+
+        if (onAuthSuccess) onAuthSuccess();
       }
-    } else {
-      // Firebase credentials pending: inform user and allow local demo
-      toast.info('Firebase keys not configured yet. Using local profile simulation.');
-      const user = store.getUserSettings();
-      const googleEmail = user.googleAccount?.email || 'alex.henderson@gmail.com';
-      const googleName = user.googleAccount?.name || user.name || 'Alex Henderson';
-
-      store.signInWithGoogle({
-        email: googleEmail,
-        name: googleName,
-        provider: 'google',
-        avatarUrl: ''
-      });
-
-      firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.4, 30);
-      toast.success(`Signed in with Google as ${googleEmail}`);
-
-      if (onAuthSuccess) onAuthSuccess();
+    } finally {
+      googleBtn.disabled = false;
+      googleBtn.style.opacity = '1';
     }
   });
 
