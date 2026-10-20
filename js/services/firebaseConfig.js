@@ -9,22 +9,14 @@ import {
   onAuthStateChanged 
 } from 'firebase/auth';
 
-function getAuthDomain() {
-  if (typeof window !== 'undefined' && window.location.hostname) {
-    const host = window.location.hostname;
-    if (host.endsWith('.web.app') || host.endsWith('.firebaseapp.com')) {
-      return host;
-    }
-  }
-  return import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "daybook-ddc79.firebaseapp.com";
-}
-
 /**
  * Firebase Project Configuration
+ * Note: authDomain must be daybook-ddc79.firebaseapp.com because Google OAuth Client ID
+ * is pre-registered with https://daybook-ddc79.firebaseapp.com/__/auth/handler.
  */
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDplbhh8dB5Zw8sMgi-39sQroTUyCpnlPk",
-  authDomain: getAuthDomain(),
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "daybook-ddc79.firebaseapp.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "daybook-ddc79",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "daybook-ddc79.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "248264696451",
