@@ -9,7 +9,7 @@ import { store } from '../store.js';
 import { modal } from './modal.js';
 import { toast } from './toast.js';
 import { firePaperConfetti } from '../utils/confetti.js';
-import { signInWithGooglePopup, isFirebaseConfigured } from '../services/firebaseConfig.js';
+import { signInWithGooglePopup, signInWithGoogleRedirect, isFirebaseConfigured } from '../services/firebaseConfig.js';
 
 export const GOOGLE_LOGO_SVG = `
 <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -99,8 +99,12 @@ export function openGoogleSignInModal(onSuccess = null) {
           const result = await signInWithGooglePopup();
           if (result.success) {
             handleLogin(result.user.name, result.user.email, 'google');
+          } else if (result.code === 'auth/popup-blocked') {
+            toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
+            await signInWithGoogleRedirect();
           } else if (result.code === 'auth/popup-closed-by-user') {
-            toast.info('Google Sign-In was cancelled.');
+            toast.info('Redirecting to Google Sign-In...');
+            await signInWithGoogleRedirect();
           } else {
             toast.error(result.message || 'Failed to authenticate with Google');
           }

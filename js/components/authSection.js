@@ -9,7 +9,7 @@ import { store } from '../store.js';
 import { toast } from './toast.js';
 import { firePaperConfetti } from '../utils/confetti.js';
 import { GOOGLE_LOGO_SVG } from './googleAuthModal.js';
-import { signInWithGooglePopup, isFirebaseConfigured, signOutFirebase } from '../services/firebaseConfig.js';
+import { signInWithGooglePopup, signInWithGoogleRedirect, isFirebaseConfigured, signOutFirebase } from '../services/firebaseConfig.js';
 
 export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
   const user = store.getUserSettings();
@@ -134,8 +134,12 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
         firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.4, 30);
         toast.success(`Signed in with Google as ${result.user.email}`);
         if (onAuthSuccess) onAuthSuccess();
+      } else if (result.code === 'auth/popup-blocked') {
+        toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
+        await signInWithGoogleRedirect();
       } else if (result.code === 'auth/popup-closed-by-user') {
-        toast.info('Google Sign-In was cancelled.');
+        toast.info('Redirecting to Google Sign-In...');
+        await signInWithGoogleRedirect();
       } else {
         toast.error(result.message || 'Failed to authenticate with Google');
       }

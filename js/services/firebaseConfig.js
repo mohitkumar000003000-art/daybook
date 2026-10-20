@@ -2,6 +2,8 @@ import { initializeApp, getApps } from 'firebase/app';
 import { 
   getAuth, 
   signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider, 
   signOut as fbSignOut, 
   onAuthStateChanged 
@@ -9,11 +11,6 @@ import {
 
 /**
  * Firebase Project Configuration
- * 
- * Replace these placeholder credentials with your Firebase project keys from:
- * Firebase Console > Project Settings > General > "Your apps" (Web App)
- * 
- * You can also set these in a `.env` file as VITE_FIREBASE_* variables.
  */
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDplbhh8dB5Zw8sMgi-39sQroTUyCpnlPk",
@@ -51,7 +48,7 @@ function getAuthServices() {
 }
 
 /**
- * Authenticate with real Google Popup via Firebase
+ * Authenticate with Google Popup via Firebase
  */
 export async function signInWithGooglePopup() {
   if (!isFirebaseConfigured()) {
@@ -86,12 +83,23 @@ export async function signInWithGooglePopup() {
       }
     };
   } catch (error) {
-    console.error('Firebase Google Sign-In error:', error);
+    console.warn('Firebase Google Sign-In notice:', error.code, error.message);
     return {
       success: false,
       code: error.code,
       message: error.message
     };
+  }
+}
+
+/**
+ * Fallback to Google Redirect if popup is blocked by browser policies
+ */
+export async function signInWithGoogleRedirect() {
+  if (!isFirebaseConfigured()) return;
+  const { auth, provider } = getAuthServices();
+  if (auth && provider) {
+    await signInWithRedirect(auth, provider);
   }
 }
 
@@ -110,23 +118,43 @@ export async function signOutFirebase() {
 }
 
 /**
- * Listen for Firebase auth state changes (e.g., page reloads)
+ * Listen for Firebase auth state changes & handle redirect results
  */
 export function initFirebaseAuthListener(onUserChanged) {
   if (!isFirebaseConfigured()) return;
   const { auth } = getAuthServices();
-  if (auth && typeof onUserChanged === 'function') {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
+  if (!auth || typeof onUserChanged !== 'function') return;
+
+  // 1. Process redirect result if returning from a full-page redirect login
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result && result.user) {
+        const u = result.user;
         onUserChanged({
-          uid: user.uid,
-          name: user.displayName || user.email?.split('@')[0],
-          email: user.email,
-          avatarUrl: user.photoURL || '',
+          uid: u.uid,
+          name: u.displayName || u.email?.split('@')[0],
+          email: u.email,
+          avatarUrl: u.photoURL || '',
           provider: 'google',
           lastSynced: new Date().toISOString()
         });
       }
+    })
+    .catch((err) => {
+      console.warn('Redirect auth result warning:', err);
     });
-  }
+
+  // 2. Persistent auth state listener
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      onUserChanged({
+        uid: user.uid,
+        name: user.displayName || user.email?.split('@')[0],
+        email: user.email,
+        avatarUrl: user.photoURL || '',
+        provider: 'google',
+        lastSynced: new Date().toISOString()
+      });
+    }
+  });
 }
