@@ -93,25 +93,40 @@ export function openGoogleSignInModal(onSuccess = null) {
       };
 
       // "Sign in with Google" button
-      overlay.querySelector('#modal-google-signin-btn')?.addEventListener('click', async () => {
-        if (isFirebaseConfigured()) {
-          toast.info('Opening Google Sign-In...');
-          const result = await signInWithGooglePopup();
-          if (result.success) {
-            handleLogin(result.user.name, result.user.email, 'google', result.user.avatarUrl);
-          } else if (result.code === 'auth/popup-blocked') {
-            toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
-            await signInWithGoogleRedirect();
-          } else if (result.code === 'auth/popup-closed-by-user') {
-            toast.info('Sign-in cancelled. Click again when ready.');
+      const googleBtn = overlay.querySelector('#modal-google-signin-btn');
+      googleBtn?.addEventListener('click', async () => {
+        if (googleBtn.disabled) return;
+        googleBtn.disabled = true;
+        googleBtn.style.opacity = '0.7';
+
+        try {
+          if (isFirebaseConfigured()) {
+            toast.info('Opening Google Sign-In...');
+            const result = await signInWithGooglePopup();
+            if (result.success) {
+              handleLogin(result.user.name, result.user.email, 'google', result.user.avatarUrl);
+              return;
+            } else if (result.code === 'in_progress') {
+              toast.info('Google window is already open. Please check your open windows.');
+            } else if (result.code === 'auth/popup-blocked') {
+              toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
+              await signInWithGoogleRedirect();
+            } else if (result.code === 'auth/popup-closed-by-user') {
+              toast.info('Sign-in window closed. Click again when ready.');
+            } else if (result.code === 'auth/cancelled-popup-request') {
+              // Ignore duplicate click noise
+            } else {
+              toast.error(result.message || 'Failed to authenticate with Google');
+            }
           } else {
-            toast.error(result.message || 'Failed to authenticate with Google');
+            // Firebase not yet configured with user's keys - offer mock sign-in with clear notification
+            toast.info('Firebase keys not configured yet. Using local profile simulation.');
+            const user = store.getUserSettings();
+            handleLogin(user.name || 'Alex Henderson', 'alex.henderson@gmail.com', 'google');
           }
-        } else {
-          // Firebase not yet configured with user's keys - offer mock sign-in with clear notification
-          toast.info('Firebase keys not configured yet. Using local profile simulation.');
-          const user = store.getUserSettings();
-          handleLogin(user.name || 'Alex Henderson', 'alex.henderson@gmail.com', 'google');
+        } finally {
+          googleBtn.disabled = false;
+          googleBtn.style.opacity = '1';
         }
       });
 

@@ -47,10 +47,20 @@ function getAuthServices() {
   return { auth: authInstance, provider: providerInstance };
 }
 
+let isAuthenticating = false;
+
 /**
  * Authenticate with Google Popup via Firebase
  */
 export async function signInWithGooglePopup() {
+  if (isAuthenticating) {
+    return {
+      success: false,
+      code: 'in_progress',
+      message: 'A Google Sign-In window is already opening. Please check your open windows.'
+    };
+  }
+
   if (!isFirebaseConfigured()) {
     return {
       success: false,
@@ -67,6 +77,7 @@ export async function signInWithGooglePopup() {
     };
   }
 
+  isAuthenticating = true;
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
@@ -89,6 +100,8 @@ export async function signInWithGooglePopup() {
       code: error.code,
       message: error.message
     };
+  } finally {
+    isAuthenticating = false;
   }
 }
 
