@@ -9,6 +9,7 @@ import { store } from '../store.js';
 import { toast } from './toast.js';
 import { firePaperConfetti } from '../utils/confetti.js';
 import { GOOGLE_LOGO_SVG } from './googleAuthModal.js';
+import { signInWithGooglePopup, isFirebaseConfigured, signOutFirebase } from '../services/firebaseConfig.js';
 
 export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
   const user = store.getUserSettings();
@@ -119,22 +120,44 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
   const signoutBtn = container.querySelector(`#${customIdPrefix}-signout-btn`);
 
   // Handle "Sign in with Google"
-  googleBtn?.addEventListener('click', (e) => {
-    const user = store.getUserSettings();
-    const googleEmail = user.googleAccount?.email || 'alex.henderson@gmail.com';
-    const googleName = user.googleAccount?.name || user.name || 'Alex Henderson';
+  googleBtn?.addEventListener('click', async (e) => {
+    if (isFirebaseConfigured()) {
+      toast.info('Opening Google Sign-In...');
+      const result = await signInWithGooglePopup();
+      if (result.success) {
+        store.signInWithGoogle({
+          email: result.user.email,
+          name: result.user.name,
+          provider: 'google',
+          avatarUrl: result.user.avatarUrl || ''
+        });
+        firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.4, 30);
+        toast.success(`Signed in with Google as ${result.user.email}`);
+        if (onAuthSuccess) onAuthSuccess();
+      } else if (result.code === 'auth/popup-closed-by-user') {
+        toast.info('Google Sign-In was cancelled.');
+      } else {
+        toast.error(result.message || 'Failed to authenticate with Google');
+      }
+    } else {
+      // Firebase credentials pending: inform user and allow local demo
+      toast.info('Firebase keys not configured yet. Using local profile simulation.');
+      const user = store.getUserSettings();
+      const googleEmail = user.googleAccount?.email || 'alex.henderson@gmail.com';
+      const googleName = user.googleAccount?.name || user.name || 'Alex Henderson';
 
-    store.signInWithGoogle({
-      email: googleEmail,
-      name: googleName,
-      provider: 'google',
-      avatarUrl: ''
-    });
+      store.signInWithGoogle({
+        email: googleEmail,
+        name: googleName,
+        provider: 'google',
+        avatarUrl: ''
+      });
 
-    firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.4, 30);
-    toast.success(`Signed in with Google as ${googleEmail}`);
+      firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.4, 30);
+      toast.success(`Signed in with Google as ${googleEmail}`);
 
-    if (onAuthSuccess) onAuthSuccess();
+      if (onAuthSuccess) onAuthSuccess();
+    }
   });
 
   // Handle "Continue with email"
@@ -195,14 +218,16 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
   });
 
   // Handle "Switch Account"
-  switchBtn?.addEventListener('click', () => {
+  switchBtn?.addEventListener('click', async () => {
+    await signOutFirebase();
     store.signOutGoogle();
     toast.info('Please choose an account to sign in.');
     if (onAuthSuccess) onAuthSuccess();
   });
 
   // Handle "Sign Out"
-  signoutBtn?.addEventListener('click', () => {
+  signoutBtn?.addEventListener('click', async () => {
+    await signOutFirebase();
     store.signOutGoogle();
     toast.info('Signed out of Daybook account');
     if (onAuthSuccess) onAuthSuccess();
