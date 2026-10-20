@@ -366,24 +366,25 @@
 /* Mobile Responsiveness for Tasks */
 @media (max-width: 768px) {
   .tasks-view {
-    gap: 14px;
+    gap: 12px;
   }
 
   /* Compact quick add bar */
   .quick-add-task-bar {
-    padding: 6px 10px;
-    gap: 8px;
+    padding: 6px 8px;
+    gap: 6px;
   }
 
   .quick-add-task-bar #quick-task-submit {
-    padding: 6px 12px;
-    min-height: 38px;
+    padding: 6px 10px;
+    min-height: 36px;
+    font-size: 0.82rem;
   }
 
   .tasks-tabs-row {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
     padding-bottom: 8px;
   }
 
@@ -391,7 +392,7 @@
     width: 100%;
     overflow-x: auto;
     padding-bottom: 4px;
-    gap: 4px;
+    gap: 2px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
@@ -401,9 +402,10 @@
   }
 
   .tab-btn {
-    padding: 6px 10px;
-    font-size: 0.82rem;
-    min-height: 36px;
+    padding: 5px 8px;
+    font-size: 0.78rem;
+    min-height: 34px;
+    gap: 4px;
   }
 
   .tab-progress-summary {
@@ -415,26 +417,26 @@
   }
 
   .tab-progress-bar {
-    flex: 0 0 100px;
+    flex: 0 0 90px;
   }
 
   .tasks-filter-toolbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
 
   .search-box {
     width: 100%;
     min-width: 0;
-    padding: 8px 12px;
+    padding: 7px 10px;
   }
 
   .category-filter-scroll {
     width: 100%;
     overflow-x: auto;
     padding-bottom: 4px;
-    gap: 6px;
+    gap: 4px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
@@ -444,16 +446,16 @@
   }
 
   .filter-pill {
-    padding: 6px 12px;
-    font-size: 0.76rem;
-    min-height: 34px;
+    padding: 5px 10px;
+    font-size: 0.74rem;
+    min-height: 32px;
   }
 
   /* Two clean dropdowns side-by-side */
   .filter-dropdowns {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
     margin-left: 0;
   }
@@ -461,36 +463,36 @@
   .filter-dropdowns .form-select {
     width: 100%;
     min-width: 0;
-    padding: 8px 10px;
-    font-size: 0.82rem;
+    padding: 7px 8px;
+    font-size: 0.8rem;
     background-color: var(--bg-surface);
   }
 
   .tasks-container {
-    padding: 12px;
+    padding: 10px;
   }
 
   /* Optimized full task row for touch */
   .full-task-row {
-    padding: 12px 10px;
-    gap: 10px;
+    padding: 10px 8px;
+    gap: 8px;
   }
 
   .task-checkbox-btn {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
   }
 
   .task-row-actions {
     opacity: 1; /* Always visible on touch screens */
-    gap: 6px;
+    gap: 4px;
   }
 
   .task-row-actions .icon-btn {
-    padding: 8px;
-    min-width: 36px;
-    min-height: 36px;
+    padding: 6px;
+    min-width: 32px;
+    min-height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -498,14 +500,31 @@
 
   .task-meta-tags {
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 4px;
+  }
+
+  .task-title {
+    font-size: 0.88rem;
+  }
+
+  .task-notes-snippet {
+    font-size: 0.78rem;
+  }
+
+  .drag-handle {
+    display: none; /* Hide drag handles on touch, use long-press or menu instead */
   }
 }
 
 @media (max-width: 480px) {
+  .tasks-view {
+    gap: 10px;
+  }
+
   .view-header-actions .btn {
     flex: 1;
     justify-content: center;
+    min-height: 40px;
   }
 
   .filter-dropdowns {
@@ -514,11 +533,30 @@
   }
 
   .quick-add-input-wrap input {
-    font-size: 0.86rem;
+    font-size: 0.84rem;
+  }
+
+  .quick-add-task-bar {
+    padding: 5px 6px;
   }
 
   .tasks-container {
-    padding: 10px 8px;
+    padding: 8px 4px;
+  }
+
+  .tab-btn {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    min-height: 32px;
+  }
+
+  .tab-count {
+    font-size: 0.68rem;
+    padding: 0px 5px;
+  }
+
+  .full-task-row {
+    padding: 8px 6px;
   }
 }
 

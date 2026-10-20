@@ -491,19 +491,23 @@
 
 /* Mobile Responsiveness for Calendar */
 @media (max-width: 768px) {
+  .calendar-view {
+    gap: 14px;
+  }
+
   .calendar-layout-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
   }
 
   .calendar-main-card {
-    padding: 14px;
+    padding: 12px;
   }
 
   .calendar-nav-toolbar {
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
 
   .cal-nav-buttons {
@@ -513,7 +517,7 @@
 
   .cal-current-label {
     min-width: 0;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
   }
 
   .cal-mode-group {
@@ -522,36 +526,45 @@
 
   .cal-mode-group .btn {
     flex: 1;
-    min-height: 40px;
+    min-height: 38px;
+    font-size: 0.82rem;
   }
 
   .cal-day-cell {
-    min-height: 56px;
+    min-height: 50px;
     padding: 4px;
   }
 
   .cal-day-num {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
   }
 
   .cal-indicator-chip {
-    font-size: 0.62rem;
-    padding: 1px 4px;
+    font-size: 0.6rem;
+    padding: 1px 3px;
   }
 
   .calendar-day-inspector {
-    padding: 16px;
+    padding: 14px;
+  }
+
+  .cal-legend-row {
+    gap: 10px;
+  }
+
+  .cal-legend-chip {
+    font-size: 0.7rem;
   }
 }
 
 @media (max-width: 480px) {
   .cal-month-grid {
-    gap: 3px;
+    gap: 2px;
   }
 
   .cal-day-cell {
-    min-height: 48px;
-    padding: 3px;
+    min-height: 42px;
+    padding: 2px;
   }
 
   .cal-indicators svg {
@@ -559,7 +572,12 @@
   }
 
   .cal-col-header {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
+  }
+
+  .cal-indicator-chip {
+    font-size: 0.56rem;
+    padding: 1px 2px;
   }
 }
 

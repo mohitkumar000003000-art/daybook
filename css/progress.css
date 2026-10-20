@@ -391,23 +391,32 @@ kbd {
 
 /* Mobile Responsiveness for Progress & Settings */
 @media (max-width: 768px) {
+  .progress-view,
+  .settings-view {
+    gap: 18px;
+  }
+
   .progress-charts-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
   }
 
   .progress-lower-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
+  }
+
+  .chart-card {
+    padding: 16px;
   }
 
   .backup-actions-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .settings-card {
-    padding: 16px;
+    padding: 14px;
   }
 
   .danger-actions-row {
@@ -417,7 +426,22 @@ kbd {
 
   .danger-actions-row .btn {
     width: 100%;
-    min-height: 44px;
+    min-height: 42px;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-card {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .settings-card {
+    padding: 12px;
   }
 }
 

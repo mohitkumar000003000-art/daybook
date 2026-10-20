@@ -194,15 +194,15 @@ a:hover {
   }
 
   .app-main-content {
-    padding: calc(var(--header-height-mobile) + 16px) 16px 90px 16px;
+    padding: calc(var(--header-height-mobile) + 12px) 14px 90px 14px;
   }
 
   .view-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 14px;
-    margin-bottom: 18px;
-    padding-bottom: 16px;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
   }
 
   .view-header-title {
@@ -217,8 +217,16 @@ a:hover {
   }
 
   .page-title {
-    font-size: 1.75rem;
+    font-size: 1.65rem;
     word-break: break-word;
+  }
+
+  .page-subtext {
+    font-size: 0.88rem;
+  }
+
+  .card-eyebrow {
+    font-size: 0.7rem;
   }
 }
 
@@ -229,11 +237,11 @@ a:hover {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
   background: var(--bg-surface);
   border-top: 1px solid var(--border);
   z-index: 90;
-  padding: 0 8px;
+  padding: 0 8px env(safe-area-inset-bottom, 0px) 8px;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
   align-items: center;
   justify-content: space-around;
@@ -307,11 +315,31 @@ a:hover {
   }
 
   .app-main-content {
-    padding: calc(var(--header-height-mobile) + 12px) 12px 80px 12px;
+    padding: calc(var(--header-height-mobile) + 10px) 10px calc(72px + env(safe-area-inset-bottom, 0px)) 10px;
   }
 
   .page-title {
-    font-size: 1.6rem;
+    font-size: 1.45rem;
+  }
+
+  .page-subtext {
+    font-size: 0.82rem;
+    margin-top: 4px;
+  }
+
+  .view-header {
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+
+  .view-header-actions {
+    gap: 6px;
+  }
+
+  .view-header-actions .btn {
+    font-size: 0.82rem;
+    padding: 7px 12px;
   }
 }
 

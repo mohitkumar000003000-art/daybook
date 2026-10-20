@@ -490,39 +490,56 @@
 
 /* Mobile Stacking & Touch-Friendliness */
 @media (max-width: 768px) {
+  .dashboard-view {
+    gap: 18px;
+  }
+
   .dashboard-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
   }
 
   .dashboard-col {
-    gap: 16px;
+    gap: 14px;
   }
 
   .dashboard-card {
-    padding: 16px;
+    padding: 14px;
   }
 
   .quick-actions-bar {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
   }
 
   .action-btn {
     width: 100%;
     justify-content: center;
-    padding: 12px 14px;
-    min-height: 44px;
+    padding: 10px 12px;
+    min-height: 42px;
+    font-size: 0.84rem;
   }
 
   .header-greeting {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
   }
 
   .quote-card {
+    padding: 12px 14px;
+  }
+
+  .stat-card {
     padding: 14px 16px;
+  }
+
+  .stat-value {
+    font-size: 1.7rem;
+  }
+
+  .card-header {
+    margin-bottom: 14px;
   }
 }
 
@@ -532,7 +549,24 @@
   }
 
   .header-greeting {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
+  }
+
+  .stats-grid {
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px 14px;
+    gap: 6px;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
   }
 }
 

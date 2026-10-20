@@ -549,6 +549,18 @@
   pointer-events: none;
 }
 
+@media (max-width: 768px) {
+  .toast-container {
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    right: 12px;
+    left: 12px;
+  }
+
+  .toast {
+    max-width: 100%;
+  }
+}
+
 .toast {
   pointer-events: auto;
   display: flex;
