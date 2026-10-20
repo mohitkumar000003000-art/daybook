@@ -4,7 +4,7 @@
 import { store } from './store.js';
 import { modal } from './components/modal.js';
 import { toast } from './components/toast.js';
-import { getTodayString, formatLiveClock } from './utils/dateUtils.js';
+import { getTodayString, formatLiveClock, formatDisplayDate } from './utils/dateUtils.js';
 
 import { DashboardView } from './views/dashboardView.js';
 import { TasksView } from './views/tasksView.js';
@@ -68,6 +68,7 @@ class App {
 
     // 2. Setup sidebar and mobile bottom navigation listeners
     this.bindNavigation();
+    this.initMobileSheets();
 
     // 3. Setup global task modal button in sidebar
     document.getElementById('sidebar-new-task-btn')?.addEventListener('click', () => {
@@ -78,11 +79,6 @@ class App {
     document.getElementById('sidebar-new-journal-btn')?.addEventListener('click', () => {
       this.openJournalEditor();
       this.closeMobileSidebar();
-    });
-
-    // Mobile quick action button in bottom navigation
-    document.getElementById('mobile-quick-action-btn')?.addEventListener('click', () => {
-      this.openTaskModal();
     });
 
     // 4. Mobile sidebar toggle
@@ -101,6 +97,20 @@ class App {
         this.renderCurrentView();
       });
     });
+
+    // Mobile top bar profile click
+    document.getElementById('mobile-top-user-btn')?.addEventListener('click', () => {
+      openGoogleSignInModal(() => {
+        this.updateSidebarUserProfile();
+        this.renderCurrentView();
+      });
+    });
+
+    // Mobile live date
+    const topDateEl = document.getElementById('mobile-top-date');
+    if (topDateEl) {
+      topDateEl.textContent = formatDisplayDate(new Date(), { weekday: 'short', month: 'short', day: 'numeric' });
+    }
 
     // 6. Global quick theme toggle in sidebar
     document.getElementById('sidebar-theme-toggle')?.addEventListener('click', () => {
@@ -158,14 +168,21 @@ class App {
     const googleAccount = user.googleAccount;
     const nameEl = document.getElementById('sidebar-user-name');
     const avatarEl = document.getElementById('sidebar-user-avatar');
+    const mobileAvatarEl = document.getElementById('mobile-top-avatar');
     const statusEl = document.getElementById('sidebar-user-status');
 
     if (googleAccount && googleAccount.isSignedIn) {
       if (nameEl) nameEl.textContent = googleAccount.name || user.name || 'My Daybook';
+      const initial = (googleAccount.name || user.name || 'D').charAt(0).toUpperCase();
       if (avatarEl) {
-        avatarEl.textContent = (googleAccount.name || user.name || 'D').charAt(0).toUpperCase();
+        avatarEl.textContent = initial;
         avatarEl.style.backgroundColor = 'var(--accent)';
         avatarEl.style.color = '#FFFFFF';
+      }
+      if (mobileAvatarEl) {
+        mobileAvatarEl.textContent = initial;
+        mobileAvatarEl.style.backgroundColor = 'var(--accent)';
+        mobileAvatarEl.style.color = '#FFFFFF';
       }
       if (statusEl) {
         const providerLabel = googleAccount.provider === 'google' ? 'Google' : 'Email';
@@ -173,10 +190,16 @@ class App {
       }
     } else {
       if (nameEl) nameEl.textContent = user.name ? `${user.name}'s Daybook` : 'My Daybook';
+      const initial = user.name ? user.name.charAt(0).toUpperCase() : 'D';
       if (avatarEl) {
-        avatarEl.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'D';
+        avatarEl.textContent = initial;
         avatarEl.style.backgroundColor = 'var(--bg-subtle)';
         avatarEl.style.color = 'var(--text-primary)';
+      }
+      if (mobileAvatarEl) {
+        mobileAvatarEl.textContent = initial;
+        mobileAvatarEl.style.backgroundColor = 'var(--bg-subtle)';
+        mobileAvatarEl.style.color = 'var(--text-primary)';
       }
       if (statusEl) {
         statusEl.innerHTML = `<span style="color:var(--accent); font-weight:500;">Sign in / Sync</span>`;
@@ -187,13 +210,92 @@ class App {
   applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     const themeIcon = document.getElementById('sidebar-theme-icon');
+    const mobileThemeIcon = document.getElementById('mobile-theme-icon');
+    const mobileThemeLabel = document.getElementById('mobile-theme-label');
+
+    const sunSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+    const moonSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+
     if (themeIcon) {
-      if (theme === 'dark') {
-        themeIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
-      } else {
-        themeIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
-      }
+      themeIcon.innerHTML = theme === 'dark' ? sunSvg : moonSvg;
     }
+    if (mobileThemeIcon) {
+      mobileThemeIcon.innerHTML = theme === 'dark' ? sunSvg : moonSvg;
+    }
+    if (mobileThemeLabel) {
+      mobileThemeLabel.textContent = theme === 'dark' ? 'Warm Paper' : 'Deep Espresso';
+    }
+  }
+
+  initMobileSheets() {
+    const qcSheet = document.getElementById('quick-create-sheet');
+    const qcBackdrop = document.getElementById('quick-create-backdrop');
+    const moreSheet = document.getElementById('more-menu-sheet');
+    const moreBackdrop = document.getElementById('more-menu-backdrop');
+
+    const closeAllSheets = () => {
+      qcSheet?.classList.remove('open');
+      qcBackdrop?.classList.remove('visible');
+      moreSheet?.classList.remove('open');
+      moreBackdrop?.classList.remove('visible');
+    };
+
+    // FAB quick create button
+    document.getElementById('mobile-fab')?.addEventListener('click', () => {
+      closeAllSheets();
+      qcBackdrop?.classList.add('visible');
+      qcSheet?.classList.add('open');
+    });
+
+    document.getElementById('quick-create-close')?.addEventListener('click', closeAllSheets);
+    qcBackdrop?.addEventListener('click', closeAllSheets);
+
+    document.getElementById('qc-new-task-btn')?.addEventListener('click', () => {
+      closeAllSheets();
+      this.openTaskModal();
+    });
+
+    document.getElementById('qc-new-journal-btn')?.addEventListener('click', () => {
+      closeAllSheets();
+      this.openJournalEditor();
+    });
+
+    // More navigation menu sheet
+    document.getElementById('mobile-more-btn')?.addEventListener('click', () => {
+      closeAllSheets();
+      moreBackdrop?.classList.add('visible');
+      moreSheet?.classList.add('open');
+    });
+
+    document.getElementById('more-menu-close')?.addEventListener('click', closeAllSheets);
+    moreBackdrop?.addEventListener('click', closeAllSheets);
+
+    // More sheet navigation links
+    document.querySelectorAll('[data-more-nav]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetView = btn.getAttribute('data-more-nav');
+        closeAllSheets();
+        this.navigate(targetView);
+      });
+    });
+
+    // Theme toggle in mobile more sheet
+    document.getElementById('mobile-theme-toggle')?.addEventListener('click', () => {
+      const cur = store.getUserSettings();
+      const nextTheme = cur.theme === 'dark' ? 'light' : 'dark';
+      store.updateUserSettings({ theme: nextTheme });
+      this.applyTheme(nextTheme);
+      toast.info(`Switched to ${nextTheme === 'dark' ? 'Deep Espresso' : 'Warm Paper'} mode`);
+    });
+
+    // Account toggle in mobile more sheet
+    document.getElementById('mobile-account-toggle')?.addEventListener('click', () => {
+      closeAllSheets();
+      openGoogleSignInModal(() => {
+        this.updateSidebarUserProfile();
+        this.renderCurrentView();
+      });
+    });
   }
 
   bindNavigation() {
@@ -238,6 +340,16 @@ class App {
         item.classList.remove('active');
       }
     });
+
+    // Highlight "More" if in a secondary view
+    const moreBtn = document.getElementById('mobile-more-btn');
+    if (moreBtn) {
+      if (['plan', 'progress', 'settings'].includes(viewName)) {
+        moreBtn.classList.add('active');
+      } else {
+        moreBtn.classList.remove('active');
+      }
+    }
 
     // Scroll main window to top
     window.scrollTo({ top: 0, behavior: 'smooth' });

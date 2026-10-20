@@ -95,8 +95,73 @@ export class DashboardView {
           </button>
         </div>
 
-        <!-- Metric Stat Cards -->
-        <div class="stats-grid">
+        <!-- Mobile Unified Progress Hero Card (Hidden on Desktop) -->
+        <div class="mobile-progress-hero">
+          <div class="card mobile-hero-card">
+            <div class="mobile-hero-header">
+              <div class="mobile-hero-lead">
+                <span class="card-eyebrow">Today's Focus</span>
+                <h2 class="mobile-hero-title">
+                  ${taskStats.total === 0 
+                    ? 'Begin your day intentionally' 
+                    : (taskStats.remaining === 0 ? 'All caught up! ✨' : `${taskStats.completed} of ${taskStats.total} completed`)}
+                </h2>
+              </div>
+              <div class="mobile-hero-badge">${taskStats.percentage}%</div>
+            </div>
+
+            <div class="progress-bar-track mobile-hero-track">
+              <div class="progress-bar-fill" style="width: ${taskStats.percentage}%"></div>
+            </div>
+
+            <!-- Swipeable Mini-Stats Strip -->
+            <div class="mobile-mini-stats-strip">
+              <div class="mini-stat-card">
+                <span class="mini-stat-icon">🔥</span>
+                <div class="mini-stat-text">
+                  <span class="mini-stat-val">${writingStats.currentStreak} d</span>
+                  <span class="mini-stat-lbl">Streak</span>
+                </div>
+              </div>
+              <div class="mini-stat-card">
+                <span class="mini-stat-icon">⚡</span>
+                <div class="mini-stat-text">
+                  <span class="mini-stat-val">${taskStats.remaining}</span>
+                  <span class="mini-stat-lbl">Tasks left</span>
+                </div>
+              </div>
+              <div class="mini-stat-card">
+                <span class="mini-stat-icon">🎯</span>
+                <div class="mini-stat-text">
+                  <span class="mini-stat-val">${todayPlan.topThree ? todayPlan.topThree.filter(m => m.completed).length : 0}/3</span>
+                  <span class="mini-stat-lbl">MITs done</span>
+                </div>
+              </div>
+              <div class="mini-stat-card">
+                <span class="mini-stat-icon">📖</span>
+                <div class="mini-stat-text">
+                  <span class="mini-stat-val">${writingStats.totalWords.toLocaleString()}</span>
+                  <span class="mini-stat-lbl">Words</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Prominent Dual Action Bar (Add Task & Write Entry) -->
+        <div class="mobile-dual-actions">
+          <button class="btn btn-primary mobile-dual-btn" id="dash-mobile-add-task">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Add Task</span>
+          </button>
+          <button class="btn btn-secondary mobile-dual-btn" id="dash-mobile-write-entry">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span>Write Entry</span>
+          </button>
+        </div>
+
+        <!-- Desktop Metric Stat Cards (Hidden on Mobile) -->
+        <div class="stats-grid desktop-stats-grid">
           <div class="stat-card">
             <div class="stat-meta">
               <span class="stat-label">Today's Progress</span>
@@ -329,6 +394,8 @@ export class DashboardView {
     // Quick action buttons
     this.container.querySelector('#dash-quick-task')?.addEventListener('click', () => this.onOpenTaskModal());
     this.container.querySelector('#dash-quick-journal')?.addEventListener('click', () => this.onOpenJournalEditor());
+    this.container.querySelector('#dash-mobile-add-task')?.addEventListener('click', () => this.onOpenTaskModal());
+    this.container.querySelector('#dash-mobile-write-entry')?.addEventListener('click', () => this.onOpenJournalEditor());
     this.container.querySelector('#dash-quick-plan')?.addEventListener('click', () => this.onNavigate('plan'));
     this.container.querySelector('#dash-quick-calendar')?.addEventListener('click', () => this.onNavigate('calendar'));
 

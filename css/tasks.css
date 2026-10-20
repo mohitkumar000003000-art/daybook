@@ -397,15 +397,25 @@
     scrollbar-width: none;
   }
 
+  .tab-pills {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
   .tab-pills::-webkit-scrollbar {
     display: none;
   }
 
   .tab-btn {
-    padding: 5px 8px;
-    font-size: 0.78rem;
-    min-height: 34px;
-    gap: 4px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    min-height: 44px;
+    gap: 6px;
+    border-radius: var(--radius-full);
   }
 
   .tab-progress-summary {
@@ -429,14 +439,15 @@
   .search-box {
     width: 100%;
     min-width: 0;
-    padding: 7px 10px;
+    padding: 8px 12px;
+    min-height: 44px;
   }
 
   .category-filter-scroll {
     width: 100%;
     overflow-x: auto;
     padding-bottom: 4px;
-    gap: 4px;
+    gap: 6px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
@@ -446,9 +457,11 @@
   }
 
   .filter-pill {
-    padding: 5px 10px;
-    font-size: 0.74rem;
-    min-height: 32px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
   }
 
   /* Two clean dropdowns side-by-side */
@@ -463,36 +476,51 @@
   .filter-dropdowns .form-select {
     width: 100%;
     min-width: 0;
-    padding: 7px 8px;
-    font-size: 0.8rem;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    min-height: 44px;
     background-color: var(--bg-surface);
   }
 
   .tasks-container {
-    padding: 10px;
+    padding: 10px 8px;
+    border-radius: 16px;
   }
 
   /* Optimized full task row for touch */
   .full-task-row {
-    padding: 10px 8px;
-    gap: 8px;
+    padding: 12px 10px;
+    gap: 10px;
+    border-radius: 12px;
   }
 
   .task-checkbox-btn {
     width: 22px;
     height: 22px;
     min-width: 22px;
+    position: relative;
+  }
+
+  .task-checkbox-btn::before {
+    content: '';
+    position: absolute;
+    top: -11px;
+    left: -11px;
+    right: -11px;
+    bottom: -11px;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .task-row-actions {
-    opacity: 1; /* Always visible on touch screens */
-    gap: 4px;
+    opacity: 1; /* Always accessible on touch screens */
+    gap: 2px;
   }
 
   .task-row-actions .icon-btn {
-    padding: 6px;
-    min-width: 32px;
-    min-height: 32px;
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -504,7 +532,8 @@
   }
 
   .task-title {
-    font-size: 0.88rem;
+    font-size: 0.9rem;
+    line-height: 1.3;
   }
 
   .task-notes-snippet {
@@ -512,7 +541,7 @@
   }
 
   .drag-handle {
-    display: none; /* Hide drag handles on touch, use long-press or menu instead */
+    display: none; /* Hide drag handles on touch screens */
   }
 }
 

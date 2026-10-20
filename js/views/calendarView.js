@@ -26,7 +26,8 @@ export class CalendarView {
     this.currentYear = now.getFullYear();
     this.currentMonth = now.getMonth(); // 0-indexed
     this.selectedDateStr = getTodayString();
-    this.calendarMode = 'month'; // 'month' or 'week'
+    // Default mobile calendar to an agenda/list view while keeping month grid toggleable
+    this.calendarMode = (typeof window !== 'undefined' && window.innerWidth <= 768) ? 'agenda' : 'month';
   }
 
   render() {
