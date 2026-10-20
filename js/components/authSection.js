@@ -104,16 +104,11 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
 
     try {
       if (isFirebaseConfigured()) {
-        if (isMobileOrTouchDevice()) {
-          toast.info('Connecting to Google Sign-In...');
-          await signInWithGoogleRedirect();
-          return;
-        }
-
         toast.info('Opening Google Sign-In...');
         const result = await authenticateWithGoogle();
-        if (result.success) {
+        if (result.success && result.user) {
           store.signInWithGoogle({
+            uid: result.user.uid,
             email: result.user.email,
             name: result.user.name,
             provider: 'google',
@@ -126,11 +121,10 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
           toast.info('Redirecting to Google Sign-In...');
         } else if (result.code === 'in_progress') {
           toast.info('Google window is already open. Please check your open windows.');
-        } else if (result.code === 'auth/cancelled-popup-request') {
-          // Ignore duplicate click noise
+        } else if (result.code === 'auth/popup-closed-by-user' || result.code === 'auth/cancelled-popup-request') {
+          toast.info('Sign-in cancelled.');
         } else {
-          toast.info('Redirecting to Google Sign-In...');
-          await signInWithGoogleRedirect();
+          toast.warning('Google sign-in could not be completed.');
         }
       } else {
         // Firebase credentials pending: inform user and allow local demo

@@ -21,7 +21,7 @@ class Store {
         const parsed = JSON.parse(stored);
         // If stored data contains the legacy demo "Alex" seed or legacy tasks, upgrade to clean state
         const isLegacyDemo = parsed && (
-          (parsed.user && parsed.user.name === 'Alex') ||
+          (parsed.user && parsed.user.name === 'Alex' && !parsed.user.googleAccount?.isSignedIn) ||
           (Array.isArray(parsed.tasks) && parsed.tasks.some(t => t.id === 'task-1' || t.id === 'task-2'))
         );
         if (isLegacyDemo) {
@@ -423,17 +423,22 @@ class Store {
   }
 
   signInWithGoogle(accountData) {
+    if (!accountData) return this.data.user;
     if (!this.data.user) this.data.user = {};
     const userName = accountData.name || (accountData.email ? accountData.email.split('@')[0] : '') || this.data.user.name || 'Daybook Writer';
     this.data.user.googleAccount = {
       isSignedIn: true,
-      email: accountData.email,
+      uid: accountData.uid || this.data.user.googleAccount?.uid || '',
+      email: accountData.email || this.data.user.googleAccount?.email || '',
       name: userName,
       avatarUrl: accountData.avatarUrl || '',
       provider: accountData.provider || 'google',
       lastSynced: new Date().toISOString()
     };
     this.data.user.name = userName;
+    try {
+      localStorage.setItem('daybook_onboarding_completed', 'true');
+    } catch (_) {}
     this.saveToStorage();
     this.notify('user:google_signin', this.data.user);
     this.notify('user:updated', this.data.user);
@@ -513,7 +518,12 @@ class Store {
   }
 
   clearAllData() {
+    const existingGoogle = this.data?.user?.googleAccount;
     this.data = this.getCleanEmptyState();
+    if (existingGoogle && existingGoogle.isSignedIn) {
+      this.data.user.googleAccount = { ...existingGoogle };
+      this.data.user.name = existingGoogle.name || '';
+    }
     this.saveToStorage();
     this.notify('data:cleared', this.data);
   }

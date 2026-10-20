@@ -18,6 +18,10 @@ import { openGoogleSignInModal } from './components/googleAuthModal.js';
 import { shouldShowOnboarding, showOnboardingModal } from './components/onboardingModal.js';
 import { initFirebaseAuthListener } from './services/firebaseConfig.js';
 
+if (typeof window !== 'undefined') {
+  window.store = store;
+}
+
 class App {
   constructor() {
     this.currentView = 'dashboard';

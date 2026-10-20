@@ -18,8 +18,8 @@ export function shouldShowOnboarding() {
   const entries = store.getJournalEntries();
   const user = store.getUserSettings();
 
-  // If user has saved tasks, entries, or profile name, they are an existing user
-  if (tasks.length > 0 || entries.length > 0 || (user.name && user.name.trim() !== '')) {
+  // If user has saved tasks, entries, profile name, or signed-in account, they are an existing user
+  if (tasks.length > 0 || entries.length > 0 || (user.name && user.name.trim() !== '') || (user.googleAccount && user.googleAccount.isSignedIn)) {
     localStorage.setItem('daybook_onboarding_completed', 'true');
     return false;
   }

@@ -169,8 +169,9 @@ function renderSignInModal(onSuccess = null) {
   modal.open('Account Connection', content, {
     maxWidth: '440px',
     onMount: (overlay) => {
-      const handleLogin = (name, email, provider, avatarUrl = '') => {
+      const handleLogin = (name, email, provider, avatarUrl = '', uid = '') => {
         store.signInWithGoogle({
+          uid,
           name,
           email,
           provider,
@@ -196,26 +197,19 @@ function renderSignInModal(onSuccess = null) {
 
         try {
           if (isFirebaseConfigured()) {
-            if (isMobileOrTouchDevice()) {
-              toast.info('Connecting to Google Sign-In...');
-              await signInWithGoogleRedirect();
-              return;
-            }
-
             toast.info('Opening Google Sign-In...');
             const result = await authenticateWithGoogle();
-            if (result.success) {
-              handleLogin(result.user.name, result.user.email, 'google', result.user.avatarUrl);
+            if (result.success && result.user) {
+              handleLogin(result.user.name, result.user.email, 'google', result.user.avatarUrl, result.user.uid);
               return;
             } else if (result.redirected) {
               toast.info('Redirecting to Google Sign-In...');
             } else if (result.code === 'in_progress') {
               toast.info('Google window is already open. Please check your open windows.');
-            } else if (result.code === 'auth/cancelled-popup-request') {
-              // Ignore duplicate click noise
+            } else if (result.code === 'auth/popup-closed-by-user' || result.code === 'auth/cancelled-popup-request') {
+              toast.info('Sign-in cancelled.');
             } else {
-              toast.info('Redirecting to Google Sign-In...');
-              await signInWithGoogleRedirect();
+              toast.warning('Google sign-in could not be completed.');
             }
           } else {
             // Firebase not yet configured with user's keys - offer mock sign-in with clear notification

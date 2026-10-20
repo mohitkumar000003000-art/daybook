@@ -2,6 +2,8 @@ import { initializeApp, getApps } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import { 
   getAuth, 
+  setPersistence,
+  browserLocalPersistence,
   signInWithPopup, 
   signInWithRedirect,
   getRedirectResult,
@@ -32,8 +34,7 @@ export function isMobileOrTouchDevice() {
   const ua = navigator.userAgent || '';
   const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
   const isTouch = Boolean(navigator.maxTouchPoints && navigator.maxTouchPoints > 0) || ('ontouchstart' in window);
-  const isSmallScreen = window.innerWidth <= 1024;
-  return isMobileUA || (isTouch && isSmallScreen);
+  return isMobileUA || isTouch;
 }
 
 /**
@@ -53,6 +54,9 @@ function getAuthServices() {
     try {
       const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
       authInstance = getAuth(app);
+      setPersistence(authInstance, browserLocalPersistence).catch(err => {
+        console.warn('Firebase persistence setting notice:', err);
+      });
       providerInstance = new GoogleAuthProvider();
       providerInstance.setCustomParameters({ prompt: 'select_account' });
 
@@ -177,13 +181,14 @@ export async function authenticateWithGoogle(options = {}) {
     };
   }
 
-  // 1. Mobile, tablet, or touch-emulation viewports work best with direct redirect
-  if (forceRedirect || preferRedirect || isMobileOrTouchDevice()) {
+  // 1. If redirect is explicitly requested, use redirect
+  if (forceRedirect || preferRedirect) {
     await signInWithGoogleRedirect(loginHint);
     return { redirected: true };
   }
 
-  // 2. Desktop: try popup first
+  // 2. Try popup first across all environments (including mobile)
+  // Popup keeps the app state active in memory and resolves directly to the caller
   const res = await signInWithGooglePopup(loginHint);
   if (res.success) {
     return res;
