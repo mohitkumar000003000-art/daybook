@@ -91,8 +91,9 @@ class App {
       this.closeMobileSidebar();
     });
 
-    // 5. Sidebar Google account & profile click
+    // Sidebar Google account & profile click
     document.getElementById('sidebar-user-chip')?.addEventListener('click', () => {
+      this.closeAllSheets?.();
       openGoogleSignInModal(() => {
         this.updateSidebarUserProfile();
         this.renderCurrentView();
@@ -101,6 +102,7 @@ class App {
 
     // Mobile top bar profile click
     document.getElementById('mobile-top-user-btn')?.addEventListener('click', () => {
+      this.closeAllSheets?.();
       openGoogleSignInModal(() => {
         this.updateSidebarUserProfile();
         this.renderCurrentView();
@@ -242,12 +244,13 @@ class App {
     const moreSheet = document.getElementById('more-menu-sheet');
     const moreBackdrop = document.getElementById('more-menu-backdrop');
 
-    const closeAllSheets = () => {
+    this.closeAllSheets = () => {
       qcSheet?.classList.remove('open');
       qcBackdrop?.classList.remove('visible');
       moreSheet?.classList.remove('open');
       moreBackdrop?.classList.remove('visible');
     };
+    const closeAllSheets = this.closeAllSheets;
 
     // FAB quick create button
     document.getElementById('mobile-fab')?.addEventListener('click', () => {
@@ -329,6 +332,7 @@ class App {
   }
 
   navigate(viewName) {
+    this.closeAllSheets?.();
     if (!this.views[viewName]) return;
     this.currentView = viewName;
 
@@ -388,6 +392,7 @@ class App {
   }
 
   openTaskModal(taskId = null, initialDate = null) {
+    this.closeAllSheets?.();
     const isEdit = !!taskId;
     const task = isEdit ? store.getTaskById(taskId) : null;
     const categories = store.getCategories();
