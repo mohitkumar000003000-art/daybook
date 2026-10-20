@@ -88,9 +88,6 @@ export class PlanView {
               </div>
             </div>
 
-              </div>
-            </div>
-
             <!-- 3. Unfinished Tasks Review Card -->
             <div class="card plan-card rollover-card">
               <div class="card-header">
