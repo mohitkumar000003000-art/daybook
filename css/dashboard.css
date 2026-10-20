@@ -488,10 +488,141 @@
   text-overflow: ellipsis;
 }
 
+/* Desktop vs Mobile Hero Rules */
+.mobile-progress-hero {
+  display: none;
+}
+
+.mobile-dual-actions {
+  display: none;
+}
+
 /* Mobile Stacking & Touch-Friendliness */
 @media (max-width: 768px) {
   .dashboard-view {
-    gap: 18px;
+    gap: 14px;
+  }
+
+  /* Hide crowded desktop stat cards and desktop action row */
+  .desktop-stats-grid,
+  .quick-actions-bar {
+    display: none !important;
+  }
+
+  /* Show unified mobile hero & dual actions */
+  .mobile-progress-hero {
+    display: block;
+    width: 100%;
+  }
+
+  .mobile-hero-card {
+    padding: 16px 16px 14px 16px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  }
+
+  .mobile-hero-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .mobile-hero-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-top: 2px;
+    line-height: 1.25;
+  }
+
+  .mobile-hero-badge {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--font-serif);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .mobile-hero-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-subtle);
+    overflow: hidden;
+  }
+
+  .mobile-mini-stats-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-top: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-mini-stats-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mini-stat-card {
+    flex: 1 0 76px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    min-height: 40px;
+  }
+
+  .mini-stat-icon {
+    font-size: 0.95rem;
+  }
+
+  .mini-stat-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mini-stat-val {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.1;
+  }
+
+  .mini-stat-lbl {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Dual Action Bar */
+  .mobile-dual-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .mobile-dual-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    border-radius: var(--radius-md);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 10px 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   }
 
   .dashboard-grid {
@@ -504,69 +635,56 @@
   }
 
   .dashboard-card {
-    padding: 14px;
+    padding: 16px 14px;
+    border-radius: 16px;
   }
 
-  .quick-actions-bar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .action-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 10px 12px;
-    min-height: 42px;
-    font-size: 0.84rem;
+  /* Hide secondary intention and schedule block cards on mobile first screen to keep it focused */
+  .intention-card,
+  .dashboard-card:has(.schedule-blocks-list) {
+    display: none;
   }
 
   .header-greeting {
-    font-size: 1.7rem;
+    font-size: 1.55rem;
+  }
+
+  .header-subtext {
+    font-size: 0.86rem;
   }
 
   .quote-card {
-    padding: 12px 14px;
+    padding: 10px 12px;
+    gap: 10px;
   }
 
-  .stat-card {
-    padding: 14px 16px;
+  .quote-text {
+    font-size: 0.84rem;
+    line-height: 1.4;
   }
 
-  .stat-value {
-    font-size: 1.7rem;
+  .task-row {
+    padding: 10px 8px;
+    gap: 10px;
   }
 
-  .card-header {
-    margin-bottom: 14px;
+  .task-checkbox-btn {
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 
 @media (max-width: 420px) {
-  .quick-actions-bar {
-    grid-template-columns: 1fr;
-  }
-
   .header-greeting {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
   }
 
-  .stats-grid {
-    gap: 10px;
+  .dashboard-card {
+    padding: 14px 12px;
   }
 
-  .stat-card {
-    padding: 12px 14px;
-    gap: 6px;
-  }
-
-  .stat-value {
-    font-size: 1.5rem;
-  }
-
-  .stat-label {
-    font-size: 0.72rem;
+  .mobile-hero-title {
+    font-size: 1.15rem;
   }
 }
 
