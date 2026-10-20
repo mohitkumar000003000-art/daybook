@@ -358,6 +358,9 @@ export function attachEmailFeedback(inputEl, feedbackEl, onStatusChange = null) 
 
   inputEl.addEventListener('input', update);
   inputEl.addEventListener('blur', update);
+  inputEl.addEventListener('change', update);
+  inputEl.addEventListener('keyup', update);
+  inputEl._triggerEmailValidation = update;
 }
 
 function escapeHtml(str) {
