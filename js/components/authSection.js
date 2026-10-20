@@ -16,7 +16,6 @@ import {
   isMobileOrTouchDevice,
   signOutFirebase 
 } from '../services/firebaseConfig.js';
-import { validateEmail, attachEmailFeedback } from '../utils/emailValidator.js';
 
 export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
   const user = store.getUserSettings();
@@ -76,46 +75,16 @@ export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
         </div>
       </div>
 
-      <div class="auth-dual-action-pane">
-        <!-- 1. Sign in with Google -->
-        <div class="auth-google-col">
-          <button type="button" class="google-sign-in-btn auth-main-btn w-100" id="${customIdPrefix}-google-btn">
-            ${GOOGLE_LOGO_SVG}
-            <span>Sign in with Google</span>
-          </button>
-        </div>
-
-        <!-- 2. Divider with "or" -->
-        <div class="auth-divider">
-          <span>or</span>
-        </div>
-
-        <!-- 3. Continue with email -->
-        <form class="auth-email-form" id="${customIdPrefix}-email-form" onsubmit="return false;">
-          <div class="auth-input-col">
-            <div class="auth-input-wrapper">
-              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              <input 
-                type="email" 
-                class="form-input auth-email-input" 
-                id="${customIdPrefix}-email-input" 
-                placeholder="Enter your authentic Gmail address" 
-                autocomplete="email"
-                required 
-              />
-            </div>
-            <div class="email-validation-feedback" id="${customIdPrefix}-email-feedback"></div>
-          </div>
-          <button type="submit" class="btn btn-primary auth-main-btn continue-email-btn" id="${customIdPrefix}-email-btn">
-            <span>Verify & Sign in</span>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </button>
-        </form>
+      <div class="auth-action-pane" style="display:flex; justify-content:flex-start; align-items:center; padding: 6px 0;">
+        <button type="button" class="google-sign-in-btn auth-main-btn" id="${customIdPrefix}-google-btn" style="max-width: 280px; width: 100%;">
+          ${GOOGLE_LOGO_SVG}
+          <span>Sign in with Google</span>
+        </button>
       </div>
 
       <div class="auth-box-footer">
         <p class="auth-footnote">
-          🔒 Only authentic, verified Google accounts can sign in. Fake or unverified accounts are automatically rejected.
+          🔒 Secure 1-click Google authentication. Only authentic, verified accounts can sign in.
         </p>
       </div>
     </section>
@@ -124,15 +93,8 @@ export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
 
 export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', onAuthSuccess = null) {
   const googleBtn = container.querySelector(`#${customIdPrefix}-google-btn`);
-  const emailForm = container.querySelector(`#${customIdPrefix}-email-form`);
-  const emailInput = container.querySelector(`#${customIdPrefix}-email-input`);
-  const emailFeedback = container.querySelector(`#${customIdPrefix}-email-feedback`);
   const switchBtn = container.querySelector(`#${customIdPrefix}-switch-btn`);
   const signoutBtn = container.querySelector(`#${customIdPrefix}-signout-btn`);
-
-  if (emailInput && emailFeedback) {
-    attachEmailFeedback(emailInput, emailFeedback);
-  }
 
   // Handle "Sign in with Google"
   googleBtn?.addEventListener('click', async (e) => {
@@ -194,86 +156,6 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
       googleBtn.style.opacity = '1';
     }
   });
-
-  // Handle "Continue with email"
-  emailForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    handleEmailSubmit();
-  });
-
-  const emailBtn = container.querySelector(`#${customIdPrefix}-email-btn`);
-  emailBtn?.addEventListener('click', (e) => {
-    e.preventDefault();
-    handleEmailSubmit();
-  });
-
-  async function handleEmailSubmit() {
-    if (!emailInput) return;
-    const raw = (emailInput.value || '').trim();
-    if (!raw) {
-      toast.warning('Please enter your authentic Gmail address.');
-      emailInput.focus();
-      return;
-    }
-
-    const res = validateEmail(raw);
-    if (!res.isValid) {
-      toast.warning(res.error || 'Please enter a valid Gmail address.');
-      emailInput.focus();
-      return;
-    }
-
-    const validEmail = res.normalizedEmail;
-    const emailBtn = container.querySelector(`#${customIdPrefix}-email-btn`);
-    if (emailBtn) {
-      emailBtn.disabled = true;
-      emailBtn.style.opacity = '0.7';
-    }
-
-    toast.info(`Connecting to Google to verify ${validEmail}...`);
-
-    try {
-      if (isFirebaseConfigured()) {
-        if (isMobileOrTouchDevice()) {
-          await signInWithGoogleRedirect(validEmail);
-          return;
-        }
-
-        const result = await authenticateWithGoogle({ loginHint: validEmail });
-        if (result.success) {
-          store.signInWithGoogle({
-            uid: result.user.uid,
-            email: result.user.email,
-            name: result.user.name,
-            provider: 'google',
-            avatarUrl: result.user.avatarUrl || ''
-          });
-          const rect = emailInput.getBoundingClientRect();
-          firePaperConfetti(rect.left + rect.width / 2, rect.top, 30);
-          toast.success(`Authentic account verified! Welcome, ${result.user.name || result.user.email}!`);
-          if (onAuthSuccess) onAuthSuccess();
-        } else if (result.redirected) {
-          toast.info('Redirecting to Google verification...');
-        } else if (result.code === 'in_progress') {
-          toast.info('Google verification window is already open. Please complete sign-in.');
-        } else if (result.code === 'auth/popup-closed-by-user' || result.code === 'auth/cancelled-popup-request') {
-          toast.warning('Verification was not completed. Fake or unauthenticated accounts cannot sign in.');
-        } else {
-          toast.warning('Google could not verify this account. Please use an authentic Google/Gmail account.');
-        }
-      } else {
-        toast.error('Firebase authentication service is not connected.');
-      }
-    } catch (err) {
-      console.error('Email authentication error:', err);
-      toast.warning('Authentication failed. Please verify with a real Gmail account.');
-    } finally {
-      if (emailBtn) {
-        emailBtn.disabled = false;
-        emailBtn.style.opacity = '1';
-      }
-    }
-  }
 
   // Handle "Backup to Drive"
   const backupBtn = container.querySelector(`#${customIdPrefix}-backup-btn`);

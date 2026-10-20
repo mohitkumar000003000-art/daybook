@@ -15,7 +15,6 @@ import {
   isMobileOrTouchDevice,
   signOutFirebase
 } from '../services/firebaseConfig.js';
-import { validateEmail, attachEmailFeedback } from '../utils/emailValidator.js';
 
 export const GOOGLE_LOGO_SVG = `
 <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -157,30 +156,6 @@ function renderSignInModal(onSuccess = null) {
           </button>
         </div>
 
-        <!-- Divider with "or" -->
-        <div class="auth-divider">
-          <span>or</span>
-        </div>
-
-        <!-- Continue with email -->
-        <form id="modal-email-form" onsubmit="return false;" style="display:flex; flex-direction:column; gap:8px;">
-          <div class="auth-input-wrapper">
-            <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <input 
-              type="email" 
-              id="modal-email-input" 
-              class="form-input auth-email-input" 
-              placeholder="Enter your authentic Gmail address" 
-              required 
-              autocomplete="email"
-            />
-          </div>
-          <div class="email-validation-feedback" id="modal-email-feedback"></div>
-          <button type="submit" class="btn btn-primary auth-main-btn continue-email-btn w-100" id="modal-continue-email-btn" style="margin-top:4px;">
-            <span>Verify & Sign in</span>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </button>
-        </form>
       </div>
 
       <!-- Privacy Safeguard Note -->
@@ -258,82 +233,6 @@ function renderSignInModal(onSuccess = null) {
       overlay.querySelector('#modal-google-redirect-btn')?.addEventListener('click', async () => {
         toast.info('Redirecting to Google Sign-In...');
         await signInWithGoogleRedirect();
-      });
-
-      // "Continue with email" button & form
-      const emailForm = overlay.querySelector('#modal-email-form');
-      const emailInput = overlay.querySelector('#modal-email-input');
-      const emailFeedback = overlay.querySelector('#modal-email-feedback');
-
-      if (emailInput && emailFeedback) {
-        attachEmailFeedback(emailInput, emailFeedback);
-      }
-
-      const submitEmail = async () => {
-        const raw = (emailInput?.value || '').trim();
-        if (!raw) {
-          toast.warning('Please enter your authentic Gmail address.');
-          emailInput?.focus();
-          return;
-        }
-
-        const res = validateEmail(raw);
-        if (!res.isValid) {
-          toast.warning(res.error || 'Please enter a valid Gmail address.');
-          emailInput?.focus();
-          return;
-        }
-
-        const validEmail = res.normalizedEmail;
-        const continueBtn = overlay.querySelector('#modal-continue-email-btn');
-        if (continueBtn) {
-          continueBtn.disabled = true;
-          continueBtn.style.opacity = '0.7';
-        }
-
-        toast.info(`Connecting to Google to verify ${validEmail}...`);
-
-        try {
-          if (isFirebaseConfigured()) {
-            if (isMobileOrTouchDevice()) {
-              await signInWithGoogleRedirect(validEmail);
-              return;
-            }
-
-            const result = await authenticateWithGoogle({ loginHint: validEmail });
-            if (result.success) {
-              handleLogin(result.user.name, result.user.email, 'google', result.user.avatarUrl || '');
-            } else if (result.redirected) {
-              toast.info('Redirecting to Google verification...');
-            } else if (result.code === 'in_progress') {
-              toast.info('Google verification window is already open. Please complete sign-in.');
-            } else if (result.code === 'auth/popup-closed-by-user' || result.code === 'auth/cancelled-popup-request') {
-              toast.warning('Verification was not completed. Fake or unauthenticated accounts cannot sign in.');
-            } else {
-              toast.warning('Google could not verify this account. Please use an authentic Google/Gmail account.');
-            }
-          } else {
-            toast.error('Firebase authentication service is not connected.');
-          }
-        } catch (err) {
-          console.error('Modal email authentication error:', err);
-          toast.warning('Authentication failed. Please verify with a real Gmail account.');
-        } finally {
-          if (continueBtn) {
-            continueBtn.disabled = false;
-            continueBtn.style.opacity = '1';
-          }
-        }
-      };
-
-      emailForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        submitEmail();
-      });
-
-      overlay.querySelector('#modal-continue-email-btn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        submitEmail();
       });
     }
   });
