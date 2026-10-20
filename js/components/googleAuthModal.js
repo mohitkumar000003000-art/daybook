@@ -74,17 +74,17 @@ export function openGoogleSignInModal(onSuccess = null) {
   modal.open('Account Connection', content, {
     maxWidth: '440px',
     onMount: (overlay) => {
-      const handleLogin = (name, email, provider) => {
+      const handleLogin = (name, email, provider, avatarUrl = '') => {
         store.signInWithGoogle({
           name,
           email,
           provider,
-          avatarUrl: '',
+          avatarUrl: avatarUrl || '',
           lastSynced: new Date().toISOString()
         });
 
         firePaperConfetti(window.innerWidth / 2, window.innerHeight * 0.45, 30);
-        toast.success(`Signed in as ${email}`);
+        toast.success(`Welcome, ${name || email}!`);
         modal.close();
 
         if (onSuccess) {
@@ -98,13 +98,12 @@ export function openGoogleSignInModal(onSuccess = null) {
           toast.info('Opening Google Sign-In...');
           const result = await signInWithGooglePopup();
           if (result.success) {
-            handleLogin(result.user.name, result.user.email, 'google');
+            handleLogin(result.user.name, result.user.email, 'google', result.user.avatarUrl);
           } else if (result.code === 'auth/popup-blocked') {
             toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
             await signInWithGoogleRedirect();
           } else if (result.code === 'auth/popup-closed-by-user') {
-            toast.info('Redirecting to Google Sign-In...');
-            await signInWithGoogleRedirect();
+            toast.info('Sign-in cancelled. Click again when ready.');
           } else {
             toast.error(result.message || 'Failed to authenticate with Google');
           }

@@ -417,23 +417,26 @@ class Store {
   updateUserSettings(updates) {
     if (!this.data.user) this.data.user = {};
     Object.assign(this.data.user, updates);
+    this.saveToStorage();
     this.notify('user:updated', this.data.user);
     return this.data.user;
   }
 
   signInWithGoogle(accountData) {
     if (!this.data.user) this.data.user = {};
+    const userName = accountData.name || (accountData.email ? accountData.email.split('@')[0] : '') || this.data.user.name || 'Daybook Writer';
     this.data.user.googleAccount = {
       isSignedIn: true,
       email: accountData.email,
-      name: accountData.name || this.data.user.name,
+      name: userName,
       avatarUrl: accountData.avatarUrl || '',
+      provider: accountData.provider || 'google',
       lastSynced: new Date().toISOString()
     };
-    if (accountData.name) {
-      this.data.user.name = accountData.name;
-    }
+    this.data.user.name = userName;
+    this.saveToStorage();
     this.notify('user:google_signin', this.data.user);
+    this.notify('user:updated', this.data.user);
     return this.data.user;
   }
 
@@ -444,9 +447,12 @@ class Store {
       email: '',
       name: '',
       avatarUrl: '',
+      provider: '',
       lastSynced: null
     };
+    this.saveToStorage();
     this.notify('user:google_signout', this.data.user);
+    this.notify('user:updated', this.data.user);
     return this.data.user;
   }
 
