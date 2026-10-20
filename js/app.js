@@ -553,7 +553,7 @@ class App {
       document.querySelectorAll('*').forEach(el => {
         try {
           if (el.shadowRoot) {
-            const shadowBadge = el.shadowRoot.querySelector('iframe, [aria-label*="Netlify" i], .netlify-badge, a[href*="netlify"]');
+            const shadowBadge = el.shadowRoot.querySelector('netlify-drawer, [aria-label*="Netlify" i], .netlify-badge, a[href*="netlify"], iframe[src*="netlify"]');
             if (shadowBadge) {
               el.remove();
             }
