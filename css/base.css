@@ -11,6 +11,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -19,6 +21,10 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  position: relative;
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
@@ -58,12 +64,26 @@ a:hover {
 .app-layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .app-main-content {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
+  width: 100%;
   padding: 36px 48px 80px 48px;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+#main-view-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   display: flex;
   justify-content: center;
 }
@@ -71,6 +91,8 @@ a:hover {
 .view-content {
   width: 100%;
   max-width: var(--max-content-width);
+  min-width: 0;
+  box-sizing: border-box;
   animation: fadeInView 200ms ease-out;
 }
 
