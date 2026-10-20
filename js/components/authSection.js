@@ -138,8 +138,7 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
         toast.info('Popup blocked by browser. Redirecting to Google Sign-In...');
         await signInWithGoogleRedirect();
       } else if (result.code === 'auth/popup-closed-by-user') {
-        toast.info('Redirecting to Google Sign-In...');
-        await signInWithGoogleRedirect();
+        toast.info('Sign-in cancelled. Click again when ready.');
       } else {
         toast.error(result.message || 'Failed to authenticate with Google');
       }
