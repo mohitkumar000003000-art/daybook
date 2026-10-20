@@ -76,7 +76,7 @@ let isAuthenticating = false;
 /**
  * Authenticate with Google Popup via Firebase
  */
-export async function signInWithGooglePopup() {
+export async function signInWithGooglePopup(loginHint = null) {
   if (isAuthenticating) {
     return {
       success: false,
@@ -99,6 +99,18 @@ export async function signInWithGooglePopup() {
       success: false,
       error: 'Unable to initialize Firebase authentication services.'
     };
+  }
+
+  // Pre-fill entered Gmail as login_hint so Google directly checks and validates that account
+  if (loginHint) {
+    provider.setCustomParameters({
+      login_hint: loginHint,
+      prompt: 'consent'
+    });
+  } else {
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
   }
 
   isAuthenticating = true;
@@ -132,10 +144,20 @@ export async function signInWithGooglePopup() {
 /**
  * Fallback to Google Redirect if popup is blocked by browser policies
  */
-export async function signInWithGoogleRedirect() {
+export async function signInWithGoogleRedirect(loginHint = null) {
   if (!isFirebaseConfigured()) return;
   const { auth, provider } = getAuthServices();
   if (auth && provider) {
+    if (loginHint) {
+      provider.setCustomParameters({
+        login_hint: loginHint,
+        prompt: 'consent'
+      });
+    } else {
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+    }
     await signInWithRedirect(auth, provider);
   }
 }
@@ -145,7 +167,7 @@ export async function signInWithGoogleRedirect() {
  * Automatically chooses the best flow (redirect on mobile/tablet or popup with redirect fallback on desktop)
  */
 export async function authenticateWithGoogle(options = {}) {
-  const { forceRedirect = false, preferRedirect = false } = options;
+  const { forceRedirect = false, preferRedirect = false, loginHint = null } = options;
 
   if (!isFirebaseConfigured()) {
     return {
@@ -157,20 +179,20 @@ export async function authenticateWithGoogle(options = {}) {
 
   // 1. Mobile, tablet, or touch-emulation viewports work best with direct redirect
   if (forceRedirect || preferRedirect || isMobileOrTouchDevice()) {
-    await signInWithGoogleRedirect();
+    await signInWithGoogleRedirect(loginHint);
     return { redirected: true };
   }
 
   // 2. Desktop: try popup first
-  const res = await signInWithGooglePopup();
+  const res = await signInWithGooglePopup(loginHint);
   if (res.success) {
     return res;
   }
 
-  // 3. Fallback: if browser blocked or closed popup, switch seamlessly to redirect
-  if (res.code === 'auth/popup-blocked' || res.code === 'auth/popup-closed-by-user') {
-    console.info('Popup unavailable, proceeding with direct Google redirect...');
-    await signInWithGoogleRedirect();
+  // 3. Fallback: if browser strictly blocked popup, switch seamlessly to redirect
+  if (res.code === 'auth/popup-blocked') {
+    console.info('Popup blocked by browser, proceeding with direct Google redirect...');
+    await signInWithGoogleRedirect(loginHint);
     return { redirected: true };
   }
 

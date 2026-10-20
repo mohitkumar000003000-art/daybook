@@ -26,6 +26,16 @@ const DOMAIN_TYPOS = {
 };
 
 const DISPOSABLE_DOMAINS = new Set([
+  'example.com',
+  'example.org',
+  'example.net',
+  'test.com',
+  'fake.com',
+  'fakemail.com',
+  'dummy.com',
+  'none.com',
+  'asdf.com',
+  'invalid.com',
   'mailinator.com',
   'tempmail.com',
   '10minutemail.com',
@@ -268,7 +278,7 @@ export function validateEmail(email) {
     suggestion,
     isGmail,
     normalizedEmail,
-    message: isGmail ? 'Valid Gmail address ✓' : 'Valid email address ✓'
+    message: isGmail ? 'Valid format ✓ Click below to verify authentic account' : 'Valid format ✓ Click below to verify authentic account'
   };
 }
 

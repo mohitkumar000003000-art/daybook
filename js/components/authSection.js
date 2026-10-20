@@ -99,7 +99,7 @@ export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
                 type="email" 
                 class="form-input auth-email-input" 
                 id="${customIdPrefix}-email-input" 
-                placeholder="Enter your email or Gmail address" 
+                placeholder="Enter your authentic Gmail address" 
                 autocomplete="email"
                 required 
               />
@@ -107,7 +107,7 @@ export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
             <div class="email-validation-feedback" id="${customIdPrefix}-email-feedback"></div>
           </div>
           <button type="submit" class="btn btn-primary auth-main-btn continue-email-btn" id="${customIdPrefix}-email-btn">
-            <span>Continue with email</span>
+            <span>Verify & Sign in</span>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
         </form>
@@ -115,7 +115,7 @@ export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
 
       <div class="auth-box-footer">
         <p class="auth-footnote">
-          🔒 Daybook prioritizes your privacy. Your reflections are stored on your device and never sold to third parties.
+          🔒 Only authentic, verified Google accounts can sign in. Fake or unverified accounts are automatically rejected.
         </p>
       </div>
     </section>
@@ -207,35 +207,72 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
     handleEmailSubmit();
   });
 
-  function handleEmailSubmit() {
+  async function handleEmailSubmit() {
     if (!emailInput) return;
-    const raw = emailInput.value || '';
+    const raw = (emailInput.value || '').trim();
+    if (!raw) {
+      toast.warning('Please enter your authentic Gmail address.');
+      emailInput.focus();
+      return;
+    }
+
     const res = validateEmail(raw);
     if (!res.isValid) {
-      toast.warning(res.error || 'Please enter a valid email address');
+      toast.warning(res.error || 'Please enter a valid Gmail address.');
       emailInput.focus();
       return;
     }
 
     const validEmail = res.normalizedEmail;
-    // Derive name from email username (e.g. "alex.smith" -> "Alex Smith")
-    const usernamePart = validEmail.split('@')[0];
-    const derivedName = usernamePart
-      .replace(/[._\-]/g, ' ')
-      .replace(/\b\w/g, c => c.toUpperCase()) || 'Journaler';
+    const emailBtn = container.querySelector(`#${customIdPrefix}-email-btn`);
+    if (emailBtn) {
+      emailBtn.disabled = true;
+      emailBtn.style.opacity = '0.7';
+    }
 
-    store.signInWithGoogle({
-      email: validEmail,
-      name: derivedName,
-      provider: res.isGmail ? 'google' : 'email',
-      avatarUrl: ''
-    });
+    toast.info(`Connecting to Google to verify ${validEmail}...`);
 
-    const rect = emailInput.getBoundingClientRect();
-    firePaperConfetti(rect.left + rect.width / 2, rect.top, 30);
-    toast.success(`Welcome back! Signed in as ${validEmail}`);
+    try {
+      if (isFirebaseConfigured()) {
+        if (isMobileOrTouchDevice()) {
+          await signInWithGoogleRedirect(validEmail);
+          return;
+        }
 
-    if (onAuthSuccess) onAuthSuccess();
+        const result = await authenticateWithGoogle({ loginHint: validEmail });
+        if (result.success) {
+          store.signInWithGoogle({
+            uid: result.user.uid,
+            email: result.user.email,
+            name: result.user.name,
+            provider: 'google',
+            avatarUrl: result.user.avatarUrl || ''
+          });
+          const rect = emailInput.getBoundingClientRect();
+          firePaperConfetti(rect.left + rect.width / 2, rect.top, 30);
+          toast.success(`Authentic account verified! Welcome, ${result.user.name || result.user.email}!`);
+          if (onAuthSuccess) onAuthSuccess();
+        } else if (result.redirected) {
+          toast.info('Redirecting to Google verification...');
+        } else if (result.code === 'in_progress') {
+          toast.info('Google verification window is already open. Please complete sign-in.');
+        } else if (result.code === 'auth/popup-closed-by-user' || result.code === 'auth/cancelled-popup-request') {
+          toast.warning('Verification was not completed. Fake or unauthenticated accounts cannot sign in.');
+        } else {
+          toast.warning('Google could not verify this account. Please use an authentic Google/Gmail account.');
+        }
+      } else {
+        toast.error('Firebase authentication service is not connected.');
+      }
+    } catch (err) {
+      console.error('Email authentication error:', err);
+      toast.warning('Authentication failed. Please verify with a real Gmail account.');
+    } finally {
+      if (emailBtn) {
+        emailBtn.disabled = false;
+        emailBtn.style.opacity = '1';
+      }
+    }
   }
 
   // Handle "Backup to Drive"

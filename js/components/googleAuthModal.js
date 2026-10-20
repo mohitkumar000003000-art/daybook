@@ -170,14 +170,14 @@ function renderSignInModal(onSuccess = null) {
               type="email" 
               id="modal-email-input" 
               class="form-input auth-email-input" 
-              placeholder="Enter your email or Gmail address" 
+              placeholder="Enter your authentic Gmail address" 
               required 
               autocomplete="email"
             />
           </div>
           <div class="email-validation-feedback" id="modal-email-feedback"></div>
           <button type="submit" class="btn btn-primary auth-main-btn continue-email-btn w-100" id="modal-continue-email-btn" style="margin-top:4px;">
-            <span>Continue with email</span>
+            <span>Verify & Sign in</span>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
         </form>
@@ -186,7 +186,7 @@ function renderSignInModal(onSuccess = null) {
       <!-- Privacy Safeguard Note -->
       <div class="google-privacy-footer" style="margin-top: 14px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>Daybook protects your personal reflections. Your private journal entries remain encrypted on your device.</span>
+        <span>🔒 Only authentic, verified Google accounts can sign in. Fake Gmail addresses are automatically rejected.</span>
       </div>
     </div>
   `;
@@ -269,18 +269,61 @@ function renderSignInModal(onSuccess = null) {
         attachEmailFeedback(emailInput, emailFeedback);
       }
 
-      const submitEmail = () => {
-        const raw = emailInput?.value || '';
+      const submitEmail = async () => {
+        const raw = (emailInput?.value || '').trim();
+        if (!raw) {
+          toast.warning('Please enter your authentic Gmail address.');
+          emailInput?.focus();
+          return;
+        }
+
         const res = validateEmail(raw);
         if (!res.isValid) {
-          toast.warning(res.error || 'Please enter a valid email address');
+          toast.warning(res.error || 'Please enter a valid Gmail address.');
           emailInput?.focus();
           return;
         }
 
         const validEmail = res.normalizedEmail;
-        const derivedName = validEmail.split('@')[0].replace(/[._\-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Journaler';
-        handleLogin(derivedName, validEmail, res.isGmail ? 'google' : 'email');
+        const continueBtn = overlay.querySelector('#modal-continue-email-btn');
+        if (continueBtn) {
+          continueBtn.disabled = true;
+          continueBtn.style.opacity = '0.7';
+        }
+
+        toast.info(`Connecting to Google to verify ${validEmail}...`);
+
+        try {
+          if (isFirebaseConfigured()) {
+            if (isMobileOrTouchDevice()) {
+              await signInWithGoogleRedirect(validEmail);
+              return;
+            }
+
+            const result = await authenticateWithGoogle({ loginHint: validEmail });
+            if (result.success) {
+              handleLogin(result.user.name, result.user.email, 'google', result.user.avatarUrl || '');
+            } else if (result.redirected) {
+              toast.info('Redirecting to Google verification...');
+            } else if (result.code === 'in_progress') {
+              toast.info('Google verification window is already open. Please complete sign-in.');
+            } else if (result.code === 'auth/popup-closed-by-user' || result.code === 'auth/cancelled-popup-request') {
+              toast.warning('Verification was not completed. Fake or unauthenticated accounts cannot sign in.');
+            } else {
+              toast.warning('Google could not verify this account. Please use an authentic Google/Gmail account.');
+            }
+          } else {
+            toast.error('Firebase authentication service is not connected.');
+          }
+        } catch (err) {
+          console.error('Modal email authentication error:', err);
+          toast.warning('Authentication failed. Please verify with a real Gmail account.');
+        } finally {
+          if (continueBtn) {
+            continueBtn.disabled = false;
+            continueBtn.style.opacity = '1';
+          }
+        }
       };
 
       emailForm?.addEventListener('submit', (e) => {
