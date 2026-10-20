@@ -9,6 +9,7 @@ import { store } from '../store.js';
 import { modal } from './modal.js';
 import { toast } from './toast.js';
 import { firePaperConfetti } from '../utils/confetti.js';
+import { signInWithGooglePopup, isFirebaseConfigured } from '../services/firebaseConfig.js';
 
 export const GOOGLE_LOGO_SVG = `
 <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -92,9 +93,23 @@ export function openGoogleSignInModal(onSuccess = null) {
       };
 
       // "Sign in with Google" button
-      overlay.querySelector('#modal-google-signin-btn')?.addEventListener('click', () => {
-        const user = store.getUserSettings();
-        handleLogin(user.name || 'Alex Henderson', 'alex.henderson@gmail.com', 'google');
+      overlay.querySelector('#modal-google-signin-btn')?.addEventListener('click', async () => {
+        if (isFirebaseConfigured()) {
+          toast.info('Opening Google Sign-In...');
+          const result = await signInWithGooglePopup();
+          if (result.success) {
+            handleLogin(result.user.name, result.user.email, 'google');
+          } else if (result.code === 'auth/popup-closed-by-user') {
+            toast.info('Google Sign-In was cancelled.');
+          } else {
+            toast.error(result.message || 'Failed to authenticate with Google');
+          }
+        } else {
+          // Firebase not yet configured with user's keys - offer mock sign-in with clear notification
+          toast.info('Firebase keys not configured yet. Using local profile simulation.');
+          const user = store.getUserSettings();
+          handleLogin(user.name || 'Alex Henderson', 'alex.henderson@gmail.com', 'google');
+        }
       });
 
       // "Continue with email" button & form

@@ -16,6 +16,7 @@ import { SettingsView } from './views/settingsView.js';
 import { attachButtonRipples } from './utils/interactiveFX.js';
 import { openGoogleSignInModal } from './components/googleAuthModal.js';
 import { shouldShowOnboarding, showOnboardingModal } from './components/onboardingModal.js';
+import { initFirebaseAuthListener } from './services/firebaseConfig.js';
 
 class App {
   constructor() {
@@ -161,6 +162,13 @@ class App {
         this.renderCurrentView();
       });
     }
+
+    // 10. Listen for Firebase Google Auth state change
+    initFirebaseAuthListener((firebaseUser) => {
+      store.signInWithGoogle(firebaseUser);
+      this.updateSidebarUserProfile();
+      this.renderCurrentView();
+    });
   }
 
   updateSidebarUserProfile() {
