@@ -1,4 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 import { 
   getAuth, 
   signInWithPopup, 
@@ -54,6 +55,15 @@ function getAuthServices() {
       authInstance = getAuth(app);
       providerInstance = new GoogleAuthProvider();
       providerInstance.setCustomParameters({ prompt: 'select_account' });
+
+      // Initialize Firebase Analytics for active user and traffic metrics
+      if (typeof window !== 'undefined') {
+        isSupported().then(supported => {
+          if (supported) {
+            getAnalytics(app);
+          }
+        }).catch(() => {});
+      }
     } catch (err) {
       console.warn('Firebase initialization notice:', err);
     }
