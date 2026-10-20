@@ -15,6 +15,7 @@ import {
   isMobileOrTouchDevice,
   signOutFirebase
 } from '../services/firebaseConfig.js';
+import { validateEmail, attachEmailFeedback } from '../utils/emailValidator.js';
 
 export const GOOGLE_LOGO_SVG = `
 <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -162,19 +163,20 @@ function renderSignInModal(onSuccess = null) {
         </div>
 
         <!-- Continue with email -->
-        <form id="modal-email-form" onsubmit="return false;" style="display:flex; flex-direction:column; gap:10px;">
+        <form id="modal-email-form" onsubmit="return false;" style="display:flex; flex-direction:column; gap:8px;">
           <div class="auth-input-wrapper">
             <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <input 
               type="email" 
               id="modal-email-input" 
               class="form-input auth-email-input" 
-              placeholder="Enter your email address" 
+              placeholder="Enter your email or Gmail address" 
               required 
               autocomplete="email"
             />
           </div>
-          <button type="submit" class="btn btn-primary auth-main-btn continue-email-btn w-100" id="modal-continue-email-btn">
+          <div class="email-validation-feedback" id="modal-email-feedback"></div>
+          <button type="submit" class="btn btn-primary auth-main-btn continue-email-btn w-100" id="modal-continue-email-btn" style="margin-top:4px;">
             <span>Continue with email</span>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
@@ -261,16 +263,24 @@ function renderSignInModal(onSuccess = null) {
       // "Continue with email" button & form
       const emailForm = overlay.querySelector('#modal-email-form');
       const emailInput = overlay.querySelector('#modal-email-input');
+      const emailFeedback = overlay.querySelector('#modal-email-feedback');
+
+      if (emailInput && emailFeedback) {
+        attachEmailFeedback(emailInput, emailFeedback);
+      }
 
       const submitEmail = () => {
-        const email = emailInput?.value.trim();
-        if (!email || !email.includes('@') || !email.includes('.')) {
-          toast.warning('Please enter a valid email address');
+        const raw = emailInput?.value || '';
+        const res = validateEmail(raw);
+        if (!res.isValid) {
+          toast.warning(res.error || 'Please enter a valid email address');
           emailInput?.focus();
           return;
         }
-        const derivedName = email.split('@')[0].replace(/[._\-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Journaler';
-        handleLogin(derivedName, email, 'email');
+
+        const validEmail = res.normalizedEmail;
+        const derivedName = validEmail.split('@')[0].replace(/[._\-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Journaler';
+        handleLogin(derivedName, validEmail, res.isGmail ? 'google' : 'email');
       };
 
       emailForm?.addEventListener('submit', (e) => {

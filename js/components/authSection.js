@@ -16,6 +16,7 @@ import {
   isMobileOrTouchDevice,
   signOutFirebase 
 } from '../services/firebaseConfig.js';
+import { validateEmail, attachEmailFeedback } from '../utils/emailValidator.js';
 
 export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
   const user = store.getUserSettings();
@@ -97,11 +98,12 @@ export function renderAuthSectionHTML(customIdPrefix = 'dash-auth') {
               type="email" 
               class="form-input auth-email-input" 
               id="${customIdPrefix}-email-input" 
-              placeholder="Enter your email address" 
+              placeholder="Enter your email or Gmail address" 
               autocomplete="email"
               required 
             />
           </div>
+          <div class="email-validation-feedback" id="${customIdPrefix}-email-feedback"></div>
           <button type="submit" class="btn btn-primary auth-main-btn continue-email-btn" id="${customIdPrefix}-email-btn">
             <span>Continue with email</span>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -122,8 +124,13 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
   const googleBtn = container.querySelector(`#${customIdPrefix}-google-btn`);
   const emailForm = container.querySelector(`#${customIdPrefix}-email-form`);
   const emailInput = container.querySelector(`#${customIdPrefix}-email-input`);
+  const emailFeedback = container.querySelector(`#${customIdPrefix}-email-feedback`);
   const switchBtn = container.querySelector(`#${customIdPrefix}-switch-btn`);
   const signoutBtn = container.querySelector(`#${customIdPrefix}-signout-btn`);
+
+  if (emailInput && emailFeedback) {
+    attachEmailFeedback(emailInput, emailFeedback);
+  }
 
   // Handle "Sign in with Google"
   googleBtn?.addEventListener('click', async (e) => {
@@ -200,29 +207,31 @@ export function bindAuthSectionEvents(container, customIdPrefix = 'dash-auth', o
 
   function handleEmailSubmit() {
     if (!emailInput) return;
-    const email = emailInput.value.trim();
-    if (!email || !email.includes('@') || !email.includes('.')) {
-      toast.warning('Please enter a valid email address');
+    const raw = emailInput.value || '';
+    const res = validateEmail(raw);
+    if (!res.isValid) {
+      toast.warning(res.error || 'Please enter a valid email address');
       emailInput.focus();
       return;
     }
 
+    const validEmail = res.normalizedEmail;
     // Derive name from email username (e.g. "alex.smith" -> "Alex Smith")
-    const usernamePart = email.split('@')[0];
+    const usernamePart = validEmail.split('@')[0];
     const derivedName = usernamePart
       .replace(/[._\-]/g, ' ')
       .replace(/\b\w/g, c => c.toUpperCase()) || 'Journaler';
 
     store.signInWithGoogle({
-      email,
+      email: validEmail,
       name: derivedName,
-      provider: 'email',
+      provider: res.isGmail ? 'google' : 'email',
       avatarUrl: ''
     });
 
     const rect = emailInput.getBoundingClientRect();
     firePaperConfetti(rect.left + rect.width / 2, rect.top, 30);
-    toast.success(`Welcome back! Signed in as ${email}`);
+    toast.success(`Welcome back! Signed in as ${validEmail}`);
 
     if (onAuthSuccess) onAuthSuccess();
   }
