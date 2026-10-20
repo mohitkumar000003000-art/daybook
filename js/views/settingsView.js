@@ -104,40 +104,6 @@ export class SettingsView {
             </div>
           </div>
 
-          <!-- 3. Backup, Export & Import Card -->
-          <div class="card settings-card">
-            <div class="card-header">
-              <div class="card-title-group">
-                <span class="card-eyebrow">Data Sovereignty</span>
-                <h2 class="card-title">Export & Backup</h2>
-              </div>
-            </div>
-
-            <p class="card-description">
-              You own your data. Download complete backups anytime to keep in your personal records or transfer to another browser.
-            </p>
-
-            <div class="backup-actions-grid">
-              <div class="backup-action-box">
-                <h4>Full JSON Backup</h4>
-                <p>Complete snapshot of all tasks, categories, daily plans, and journal entries.</p>
-                <button class="btn btn-secondary w-100" id="export-json-btn">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Download JSON Backup
-                </button>
-              </div>
-
-              <div class="backup-action-box">
-                <h4>Restore from Backup</h4>
-                <p>Upload a previously exported Daybook JSON file to restore your entire notebook.</p>
-                <label class="btn btn-secondary w-100 file-btn-label">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  Select JSON File
-                  <input type="file" id="import-json-input" accept=".json" style="display:none;" />
-                </label>
-              </div>
-            </div>
-          </div>
 
           <!-- 4. Danger Zone & Reset Card -->
           <div class="card settings-card danger-card">
@@ -234,47 +200,6 @@ export class SettingsView {
       toast.success('Google Drive backup snapshot downloaded');
     });
 
-    // Export JSON
-    this.container.querySelector('#export-json-btn')?.addEventListener('click', () => {
-      const dataStr = store.exportData();
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `daybook_backup_${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success('Backup JSON downloaded');
-    });
-
-    // Import JSON
-    this.container.querySelector('#import-json-input')?.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const confirmed = await modal.confirm({
-          title: 'Restore Backup',
-          message: 'Restoring a backup will overwrite existing local tasks and journal entries. Do you wish to continue?',
-          confirmText: 'Restore',
-          isDestructive: false
-        });
-
-        if (confirmed) {
-          const res = store.importData(event.target.result);
-          if (res.success) {
-            toast.success('Data backup successfully restored!');
-            this.render();
-          } else {
-            toast.error('Failed to import backup: ' + res.error);
-          }
-        }
-      };
-      reader.readAsText(file);
-    });
 
     // Clear all data & start fresh
     this.container.querySelector('#clear-all-data-btn')?.addEventListener('click', async () => {
