@@ -64,31 +64,23 @@
 
   <script>
     (function() {
-      // 1. Intercept createElement to prevent any iframe or netlify element from being created
-      try {
-        const origCreate = document.createElement.bind(document);
-        document.createElement = function(tag, opts) {
-          const t = String(tag || '').toLowerCase();
-          if (t === 'iframe' || t === 'netlify-drawer') {
-            const dummy = origCreate('span');
-            dummy.style.display = 'none';
-            dummy.setAttribute('aria-hidden', 'true');
-            return dummy;
-          }
-          return origCreate(tag, opts);
-        };
-      } catch (e) {}
-
-      // 2. Set Netlify's local preference to hidden
+      // 1. Set Netlify's local preference to hidden
       try {
         localStorage.setItem('nl-hud:public:v1', 'hidden');
         localStorage.setItem('netlify-badge-dismissed', 'true');
       } catch (e) {}
 
-      // 3. Continuous eradication
+      // 2. Targeted Netlify badge removal (leaves Firebase Auth & Google iframes intact)
       function killBadges() {
         try {
-          document.querySelectorAll('iframe, netlify-drawer, [id*="netlify" i], [class*="netlify" i], [aria-label*="netlify" i]').forEach(function(el) {
+          document.querySelectorAll('netlify-drawer, [id*="netlify" i], [class*="netlify" i], [aria-label*="netlify" i], iframe[src*="netlify" i]').forEach(function(el) {
+            // Never remove Firebase or Google Auth elements
+            if (el.tagName === 'IFRAME') {
+              const src = (el.src || '').toLowerCase();
+              if (src.includes('firebase') || src.includes('google') || src.includes('accounts.google.com')) {
+                return;
+              }
+            }
             el.remove();
           });
           document.querySelectorAll('div, a, button, footer, span').forEach(function(el) {
@@ -99,7 +91,7 @@
           });
           document.querySelectorAll('*').forEach(function(el) {
             if (el.shadowRoot) {
-              const shadowBadge = el.shadowRoot.querySelector('iframe, [aria-label*="Netlify" i], .netlify-badge, a[href*="netlify"]');
+              const shadowBadge = el.shadowRoot.querySelector('netlify-drawer, [aria-label*="Netlify" i], .netlify-badge, a[href*="netlify"], iframe[src*="netlify"]');
               if (shadowBadge) {
                 el.remove();
               }
@@ -114,7 +106,7 @@
       }
       window.addEventListener('load', killBadges);
       new MutationObserver(killBadges).observe(document.documentElement, { childList: true, subtree: true });
-      setInterval(killBadges, 250);
+      setInterval(killBadges, 1000);
     })();
   </script>
 </head>

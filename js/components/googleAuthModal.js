@@ -33,10 +33,15 @@ export function openGoogleSignInModal(onSuccess = null) {
 
       <div class="auth-dialog-content" style="display:flex; flex-direction:column; gap:16px; margin-top:8px;">
         <!-- Sign in with Google -->
-        <button type="button" class="google-sign-in-btn auth-main-btn w-100" id="modal-google-signin-btn">
-          ${GOOGLE_LOGO_SVG}
-          <span>Sign in with Google</span>
-        </button>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <button type="button" class="google-sign-in-btn auth-main-btn w-100" id="modal-google-signin-btn">
+            ${GOOGLE_LOGO_SVG}
+            <span>Sign in with Google</span>
+          </button>
+          <button type="button" class="btn btn-ghost w-100" id="modal-google-redirect-btn" style="font-size:0.78rem; color:var(--text-muted); padding:4px;">
+            Popup issues? Sign in via direct redirect ↗
+          </button>
+        </div>
 
         <!-- Divider with "or" -->
         <div class="auth-divider">
@@ -128,6 +133,12 @@ export function openGoogleSignInModal(onSuccess = null) {
           googleBtn.disabled = false;
           googleBtn.style.opacity = '1';
         }
+      });
+
+      // "Sign in with Google Redirect" button
+      overlay.querySelector('#modal-google-redirect-btn')?.addEventListener('click', async () => {
+        toast.info('Redirecting to Google Sign-In...');
+        await signInWithGoogleRedirect();
       });
 
       // "Continue with email" button & form
