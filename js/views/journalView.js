@@ -9,7 +9,7 @@ import { modal } from '../components/modal.js';
 import { toast } from '../components/toast.js';
 import { getTodayString, formatDisplayDate, formatTime } from '../utils/dateUtils.js';
 import { firePaperConfetti } from '../utils/confetti.js';
-import { attach3DTilt, attachButtonRipples } from '../utils/interactiveFX.js';
+import { attach3DTilt, attachButtonRipples, animateNumberCounter } from '../utils/interactiveFX.js';
 import { sanitizeUrl } from '../utils/sanitize.js';
 
 export class JournalView {
@@ -76,7 +76,10 @@ export class JournalView {
         <!-- Stats Banner -->
         <div class="journal-stats-banner">
           <div class="jstat-col">
-            <span class="jstat-val">${writingStats.currentStreak} <span class="jstat-unit">days</span></span>
+            <span class="jstat-val">
+              <span id="journal-streak-num">${writingStats.currentStreak}</span> <span class="jstat-unit">days</span>
+              <span class="flame-badge-pulse" style="display:inline-block; font-size:1.1rem; margin-left:4px;">🔥</span>
+            </span>
             <span class="jstat-lbl">Writing Streak</span>
           </div>
           <div class="jstat-divider"></div>
@@ -288,6 +291,12 @@ export class JournalView {
 
     attach3DTilt(this.container.querySelectorAll('.journal-card'));
     attachButtonRipples(this.container);
+
+    const streakEl = this.container.querySelector('#journal-streak-num');
+    if (streakEl) {
+      const writingStats = store.getWritingStats();
+      animateNumberCounter(streakEl, writingStats.currentStreak, 400);
+    }
   }
 
   // ----------------------------------------------------
@@ -376,15 +385,16 @@ export class JournalView {
               <input type="time" id="entry-time-input" class="form-input meta-input" value="${timeVal}" />
             </div>
 
-            <div class="meta-field">
-              <label for="entry-mood-select" class="meta-label">Mood</label>
-              <select id="entry-mood-select" class="form-select meta-input">
-                <option value="peaceful" ${moodVal === 'peaceful' ? 'selected' : ''}>😌 Peaceful</option>
-                <option value="productive" ${moodVal === 'productive' ? 'selected' : ''}>⚡ Productive</option>
-                <option value="thoughtful" ${moodVal === 'thoughtful' ? 'selected' : ''}>🤔 Thoughtful</option>
-                <option value="energetic" ${moodVal === 'energetic' ? 'selected' : ''}>🔥 Energetic</option>
-                <option value="low" ${moodVal === 'low' ? 'selected' : ''}>🌧️ Gentle / Low</option>
-              </select>
+            <div class="meta-field meta-field-mood">
+              <label class="meta-label">Mood</label>
+              <div class="mood-picker-group has-selection" id="mood-picker-group">
+                <button type="button" class="mood-btn ${moodVal === 'peaceful' ? 'selected' : ''}" data-mood="peaceful">😌 Peaceful</button>
+                <button type="button" class="mood-btn ${moodVal === 'productive' ? 'selected' : ''}" data-mood="productive">⚡ Productive</button>
+                <button type="button" class="mood-btn ${moodVal === 'thoughtful' ? 'selected' : ''}" data-mood="thoughtful">🤔 Thoughtful</button>
+                <button type="button" class="mood-btn ${moodVal === 'energetic' ? 'selected' : ''}" data-mood="energetic">🔥 Energetic</button>
+                <button type="button" class="mood-btn ${moodVal === 'low' ? 'selected' : ''}" data-mood="low">🌧️ Gentle</button>
+              </div>
+              <input type="hidden" id="entry-mood-select" value="${moodVal}" />
             </div>
 
             <div class="meta-field meta-field-tags">
@@ -427,8 +437,46 @@ export class JournalView {
     const moodSelect = this.container.querySelector('#entry-mood-select');
     const tagsInput = this.container.querySelector('#entry-tags-input');
 
+    // Mood selector buttons: scales up the emoji tapped and fades the others
+    const moodBtns = this.container.querySelectorAll('.mood-btn');
+    moodBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        moodBtns.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        if (moodSelect) {
+          moodSelect.value = btn.getAttribute('data-mood');
+        }
+        this.isDirty = true;
+        this.scheduleAutoSave();
+      });
+    });
+
+    // Zen typing mode: screen dims and writing area grows when you start typing
+    const editorView = this.container.querySelector('.journal-editor-view');
+    let zenTimer = null;
+    const enterZenFocus = () => {
+      editorView?.classList.add('zen-focus');
+      clearTimeout(zenTimer);
+      zenTimer = setTimeout(() => {
+        editorView?.classList.remove('zen-focus');
+      }, 5500);
+    };
+
+    titleInput?.addEventListener('input', enterZenFocus);
+    titleInput?.addEventListener('focus', enterZenFocus);
+    titleInput?.addEventListener('blur', () => {
+      editorView?.classList.remove('zen-focus');
+    });
+
+    const editableEl = this.container.querySelector('#rich-editor-mount [contenteditable="true"]');
+    editableEl?.addEventListener('input', enterZenFocus);
+    editableEl?.addEventListener('focus', enterZenFocus);
+    editableEl?.addEventListener('blur', () => {
+      editorView?.classList.remove('zen-focus');
+    });
+
     [titleInput, dateInput, timeInput, moodSelect, tagsInput].forEach(el => {
-      el.addEventListener('input', () => {
+      el?.addEventListener('input', () => {
         this.isDirty = true;
         this.scheduleAutoSave();
       });

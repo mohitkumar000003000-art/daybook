@@ -118,8 +118,8 @@ export class CalendarView {
 
               <div class="inspector-tasks-list">
                 ${dayTasks.length === 0 ? `<p class="empty-hint">No tasks scheduled for this day.</p>` : `
-                  ${dayTasks.map(task => `
-                    <div class="inspector-task-item ${task.completed ? 'completed' : ''}" data-task-id="${task.id}">
+                  ${dayTasks.map((task, idx) => `
+                    <div class="inspector-task-item fan-out-item ${task.completed ? 'completed' : ''}" data-task-id="${task.id}" style="animation-delay: ${idx * 45}ms;">
                       <button class="task-checkbox-btn ${task.completed ? 'checked' : ''}" data-action="toggle-task" data-id="${task.id}" aria-label="Toggle task">
                         ${task.completed ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
                       </button>
@@ -143,8 +143,8 @@ export class CalendarView {
 
               <div class="inspector-entries-list">
                 ${dayEntries.length === 0 ? `<p class="empty-hint">No journal entries written on this day.</p>` : `
-                  ${dayEntries.map(entry => `
-                    <div class="inspector-entry-card" data-entry-id="${entry.id}">
+                  ${dayEntries.map((entry, idx) => `
+                    <div class="inspector-entry-card fan-out-item" data-entry-id="${entry.id}" style="animation-delay: ${idx * 50}ms;">
                       <div class="ientry-meta">
                         <span class="ientry-time">${formatTime(entry.time)}</span>
                         <span class="ientry-words">${entry.wordCount || 0} words</span>
@@ -190,8 +190,10 @@ export class CalendarView {
     const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     const headerRow = dayNames.map(d => `<div class="cal-col-header">${d}</div>`).join('');
+    const slideClass = this.slideDirection || '';
+    this.slideDirection = '';
 
-    const daysHtml = grid.map(cell => {
+    const daysHtml = grid.map((cell, idx) => {
       const isSelected = cell.dateString === this.selectedDateStr;
       const isTodayCell = isToday(cell.dateString);
       const tasks = store.getTasksForDate(cell.dateString);
@@ -201,13 +203,17 @@ export class CalendarView {
       const allTasksCompleted = hasTasks && tasks.every(t => t.completed);
       const hasJournal = entries.length > 0;
 
-      let cellClass = 'cal-day-cell';
+      let cellClass = 'cal-day-cell diagonal-fade';
       if (!cell.isCurrentMonth) cellClass += ' cal-day-outside';
       if (isSelected) cellClass += ' cal-day-selected';
       if (isTodayCell) cellClass += ' cal-day-today';
 
+      const col = idx % 7;
+      const row = Math.floor(idx / 7);
+      const delay = (col + row) * 20;
+
       return `
-        <div class="${cellClass}" data-date="${cell.dateString}" tabindex="0" role="button" aria-label="${cell.dateString}">
+        <div class="${cellClass}" data-date="${cell.dateString}" tabindex="0" role="button" aria-label="${cell.dateString}" style="animation-delay: ${delay}ms;">
           <div class="cal-cell-header">
             <span class="cal-day-num">${cell.dayNumber}</span>
             ${isTodayCell ? `<span class="cal-today-dot"></span>` : ''}
@@ -235,7 +241,7 @@ export class CalendarView {
     return `
       <div class="cal-grid-container">
         <div class="cal-days-header-row">${headerRow}</div>
-        <div class="cal-month-grid">${daysHtml}</div>
+        <div class="cal-month-grid ${slideClass}">${daysHtml}</div>
       </div>
     `;
   }
@@ -405,8 +411,9 @@ export class CalendarView {
       this.render();
     });
 
-    // Prev / Next month
+    // Prev / Next month with sliding grid transition
     this.container.querySelector('#cal-prev-btn')?.addEventListener('click', () => {
+      this.slideDirection = 'slide-right';
       if (this.calendarMode === 'month') {
         if (this.currentMonth === 0) {
           this.currentMonth = 11;
@@ -425,6 +432,7 @@ export class CalendarView {
     });
 
     this.container.querySelector('#cal-next-btn')?.addEventListener('click', () => {
+      this.slideDirection = 'slide-left';
       if (this.calendarMode === 'month') {
         if (this.currentMonth === 11) {
           this.currentMonth = 0;

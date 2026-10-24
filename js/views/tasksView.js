@@ -228,8 +228,10 @@ export class TasksView {
     const categories = store.getCategories();
     const cat = categories.find(c => c.id === task.category) || { name: task.category, color: '#455A64' };
 
+    const isDropped = this.lastAddedTaskId && this.lastAddedTaskId === task.id;
+
     return `
-      <div class="task-row full-task-row ${task.completed ? 'completed' : ''}" 
+      <div class="task-row full-task-row ${task.completed ? 'completed' : ''} ${isDropped ? 'task-drop-in' : ''}" 
            data-task-id="${task.id}" 
            draggable="${this.sortBy === 'order'}" 
            tabindex="0">
@@ -379,12 +381,13 @@ export class TasksView {
     const submitQuickAdd = () => {
       const val = quickInput.value.trim();
       if (!val) return;
-      store.addTask({
+      const newTask = store.addTask({
         title: val,
         dueDate: getTodayString(),
         priority: 'medium',
         category: this.selectedCategory !== 'all' ? this.selectedCategory : 'personal'
       });
+      this.lastAddedTaskId = newTask?.id;
       quickInput.value = '';
       toast.success('Task added to Today');
       this.render();
@@ -411,23 +414,63 @@ export class TasksView {
   }
 
   bindRowActions() {
-    // Checkbox toggle with celebration animation
+    // Checkbox toggle: pops and fills, strike-through drawn left to right, then row slides away
     this.container.querySelectorAll('[data-action="toggle-task"]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const id = btn.getAttribute('data-id');
+        const row = btn.closest('.full-task-row') || btn.closest('.task-row');
+        const task = store.getTaskById(id);
+        const willComplete = task && !task.completed;
+
+        if (willComplete && row) {
+          btn.classList.add('checked');
+          if (!btn.querySelector('svg')) {
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+          }
+          row.classList.add('completed');
+          row.classList.add('just-completed');
+
+          const shouldSlideAway = this.activeTab !== 'all' && this.activeTab !== 'completed';
+
+          if (shouldSlideAway) {
+            setTimeout(() => {
+              row.classList.add('slide-away');
+              setTimeout(() => {
+                store.toggleTask(id);
+                const stats = store.getTaskStats(store.getTodayString ? store.getTodayString() : new Date().toISOString().split('T')[0]);
+                if (stats.total > 0 && stats.remaining === 0) {
+                  firePaperConfetti(e.clientX, e.clientY, 30);
+                }
+                toast.success('Task completed! Keep up the momentum.');
+                this.render();
+              }, 340);
+            }, 260);
+            return;
+          }
+        }
+
         const updated = store.toggleTask(id);
         if (updated && updated.completed) {
           const stats = store.getTaskStats(store.getTodayString ? store.getTodayString() : new Date().toISOString().split('T')[0]);
           if (stats.total > 0 && stats.remaining === 0) {
-            firePaperConfetti(e.clientX, e.clientY, 25);
-          }
-          const row = btn.closest('.full-task-row');
-          if (row) {
-            row.classList.add('just-completed');
+            firePaperConfetti(e.clientX, e.clientY, 30);
           }
           toast.success('Task completed! Keep up the momentum.');
         }
+        this.render();
+      });
+    });
+
+    // Priority badges pulse once when clicked or changed
+    this.container.querySelectorAll('.priority-tag').forEach(tag => {
+      tag.style.cursor = 'pointer';
+      tag.title = 'Priority level';
+      tag.addEventListener('click', (e) => {
+        e.stopPropagation();
+        tag.classList.remove('pulse-once');
+        void tag.offsetWidth; // Trigger reflow for re-animation
+        tag.classList.add('pulse-once');
       });
     });
 
@@ -444,7 +487,7 @@ export class TasksView {
     this.container.querySelectorAll('.full-task-row').forEach(row => {
       row.style.cursor = 'pointer';
       row.addEventListener('click', (e) => {
-        if (e.target.closest('[data-action="toggle-task"], [data-action="delete-task"], [data-action="edit-task"], .drag-handle')) {
+        if (e.target.closest('[data-action="toggle-task"], [data-action="delete-task"], [data-action="edit-task"], .drag-handle, .priority-tag')) {
           return;
         }
         const id = row.getAttribute('data-task-id');
@@ -454,7 +497,7 @@ export class TasksView {
       });
     });
 
-    // Delete task
+    // Delete task: shrinks to nothing and rows below slide up
     this.container.querySelectorAll('[data-action="delete-task"]').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -467,9 +510,19 @@ export class TasksView {
           isDestructive: true
         });
         if (confirmed) {
-          store.deleteTask(id);
-          toast.info('Task deleted');
-          this.render();
+          const row = btn.closest('.full-task-row') || btn.closest('.task-row');
+          if (row) {
+            row.classList.add('task-deleting');
+            setTimeout(() => {
+              store.deleteTask(id);
+              toast.info('Task deleted');
+              this.render();
+            }, 300);
+          } else {
+            store.deleteTask(id);
+            toast.info('Task deleted');
+            this.render();
+          }
         }
       });
     });
@@ -491,6 +544,8 @@ export class TasksView {
 
       row.addEventListener('dragend', () => {
         row.classList.remove('dragging');
+        row.classList.add('settled');
+        setTimeout(() => row.classList.remove('settled'), 350);
         this.draggedTaskId = null;
         rows.forEach(r => r.classList.remove('drag-over'));
       });

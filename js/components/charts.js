@@ -36,15 +36,18 @@ export function renderWeeklyTaskChart(daysData) {
     const completedY = padding.top + chartHeight - completedHeight;
 
     // Remaining bar (total background bar)
+    const delay = idx * 65;
     const remainingBar = d.total > 0 ? `
       <rect x="${centerX - barWidth / 2}" y="${totalY}" width="${barWidth}" height="${totalHeight}" 
-            rx="4" fill="var(--color-bar-bg)" class="chart-bar" />
+            rx="4" fill="var(--color-bar-bg)" class="chart-bar chart-bar-grow" 
+            style="transform-origin: ${centerX}px ${padding.top + chartHeight}px; animation-delay: ${delay}ms;" />
     ` : '';
 
     // Completed bar (filled in front)
     const completedBar = d.completed > 0 ? `
       <rect x="${centerX - barWidth / 2}" y="${completedY}" width="${barWidth}" height="${completedHeight}" 
-            rx="4" fill="var(--accent)" class="chart-bar" />
+            rx="4" fill="var(--accent)" class="chart-bar chart-bar-grow" 
+            style="transform-origin: ${centerX}px ${padding.top + chartHeight}px; animation-delay: ${delay + 30}ms;" />
     ` : '';
 
     barsHtml += `

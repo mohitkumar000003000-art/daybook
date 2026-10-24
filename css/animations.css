@@ -248,15 +248,162 @@ body::before {
   }
 }
 
-/* Calm Strikethrough */
+/* Strike-through drawn left to right */
+.task-title,
+.mit-text,
+.mit-label {
+  position: relative;
+  display: inline-block;
+  transition: color 240ms ease, opacity 240ms ease;
+}
+
+.task-title::after,
+.mit-text::after,
+.mit-label::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 52%;
+  width: 100%;
+  height: 1.5px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.task-row.completed .task-title::after,
+.full-task-row.completed .task-title::after,
+.mit-item.completed .mit-text::after,
+.plan-mit-row.completed .mit-label::after {
+  transform: scaleX(1);
+}
+
 .task-row.completed .task-title,
 .full-task-row.completed .task-title,
 .mit-item.completed .mit-text,
 .plan-mit-row.completed .mit-label {
-  text-decoration: line-through;
+  text-decoration: none !important;
   color: var(--text-muted);
   opacity: 0.75;
-  transition: color 200ms ease, opacity 200ms ease;
+}
+
+/* Task row slides away on completion */
+.task-row.slide-away,
+.full-task-row.slide-away {
+  animation: taskSlideAway 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes taskSlideAway {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    max-height: 120px;
+  }
+  35% {
+    opacity: 0.6;
+    transform: translateX(20px) scale(0.98);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(65px) scale(0.95);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-color: transparent;
+  }
+}
+
+/* New task drops into the list and nudges the others down */
+.task-row.task-drop-in,
+.full-task-row.task-drop-in {
+  animation: taskDropIn 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes taskDropIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.97);
+  }
+  70% {
+    transform: translateY(3px) scale(1.008);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dragging a task lifts it with a slight tilt and a soft scale-up */
+.full-task-row.dragging {
+  transform: scale(1.03) rotate(1.5deg) !important;
+  box-shadow: 0 14px 30px rgba(45, 35, 25, 0.16), 0 4px 10px rgba(45, 35, 25, 0.08) !important;
+  border-color: var(--accent) !important;
+  background: var(--bg-surface-elevated) !important;
+  opacity: 0.95 !important;
+  z-index: 50;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease;
+}
+
+/* Settles into place when released */
+.full-task-row.settled {
+  animation: taskSettle 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes taskSettle {
+  0% {
+    transform: scale(1.03) rotate(1.2deg);
+  }
+  60% {
+    transform: scale(0.99) rotate(-0.3deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Deleting a task shrinks it to nothing, and rows below slide up */
+.full-task-row.task-deleting,
+.task-row.task-deleting {
+  animation: taskDeleteShrink 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes taskDeleteShrink {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    max-height: 120px;
+  }
+  40% {
+    opacity: 0;
+    transform: scale(0.7) translateY(-8px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-color: transparent;
+  }
+}
+
+/* Priority badges pulse once when changed */
+.priority-tag.pulse-once {
+  animation: priorityPulseOnce 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes priorityPulseOnce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.22); box-shadow: 0 0 10px rgba(184, 80, 48, 0.35); }
+  100% { transform: scale(1); }
 }
 
 /* ----------------------------------------------------
@@ -524,24 +671,526 @@ body::before {
   100% { transform: scale(1); }
 }
 
-/* Soft card reveal stagger */
-@media (max-width: 900px) {
-  .dashboard-card,
-  .mobile-hero-card,
-  .plan-card {
-    animation: cardSoftReveal 240ms cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-  }
+/* ----------------------------------------------------
+   14. DAILY PLAN & TIMELINE ANIMATIONS
+   ---------------------------------------------------- */
+/* Time blocks cascade in from top to bottom */
+.time-blocks-container .time-block-row:nth-child(1) { animation: cascadeIn 320ms var(--motion-ease-out) 30ms both; }
+.time-blocks-container .time-block-row:nth-child(2) { animation: cascadeIn 320ms var(--motion-ease-out) 65ms both; }
+.time-blocks-container .time-block-row:nth-child(3) { animation: cascadeIn 320ms var(--motion-ease-out) 100ms both; }
+.time-blocks-container .time-block-row:nth-child(4) { animation: cascadeIn 320ms var(--motion-ease-out) 135ms both; }
+.time-blocks-container .time-block-row:nth-child(5) { animation: cascadeIn 320ms var(--motion-ease-out) 170ms both; }
+.time-blocks-container .time-block-row:nth-child(n+6) { animation: cascadeIn 320ms var(--motion-ease-out) 205ms both; }
 
-  @keyframes cardSoftReveal {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+@keyframes cascadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Timeline line draws itself downward */
+.timeline-wrapper {
+  position: relative;
+}
+
+.timeline-spine-line {
+  position: absolute;
+  left: 20px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent) 0%, var(--border-strong) 100%);
+  transform-origin: top center;
+  animation: timelineDrawDown 550ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  z-index: 1;
+}
+
+@keyframes timelineDrawDown {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* "Now" marker glides along the timeline */
+.timeline-now-marker {
+  position: absolute;
+  left: 14px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 10;
+  transition: top 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.now-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+  animation: nowPulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes nowPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 3px var(--accent-subtle);
+  }
+  50% {
+    transform: scale(1.25);
+    box-shadow: 0 0 0 6px rgba(184, 80, 48, 0.25);
+  }
+}
+
+.now-line {
+  flex: 1;
+  height: 1.5px;
+  background: linear-gradient(to right, var(--accent), transparent);
+}
+
+.now-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  background: var(--bg-surface);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--accent-border);
+}
+
+/* Circular sweep fill on Rule of 3 priorities */
+.mit-sweep-circle {
+  transition: stroke-dashoffset 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Progress ring around date */
+.date-progress-ring {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.date-progress-ring circle {
+  transition: stroke-dashoffset 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ----------------------------------------------------
+   15. JOURNAL FOCUS & MOOD ANIMATIONS
+   ---------------------------------------------------- */
+/* Screen dims and writing area grows when you start typing */
+.journal-editor-view.zen-focus .editor-header-bar,
+.journal-editor-view.zen-focus .reflection-prompts-bar {
+  opacity: 0.32;
+  transition: opacity 350ms ease;
+}
+
+.journal-editor-view.zen-focus .editor-paper-container {
+  transform: scale(1.012);
+  box-shadow: 0 18px 45px rgba(45, 35, 25, 0.12);
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 350ms ease;
+}
+
+/* Saved entries slide into the list like paper being filed */
+.journal-card {
+  animation: paperFileIn 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes paperFileIn {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97) rotate(-0.75deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+/* Flame & streak badge pulse */
+.flame-badge-pulse,
+.mini-stat-icon.flame-pulse {
+  animation: flamePulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes flamePulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(222, 117, 82, 0)); }
+  100% { transform: scale(1.22); filter: drop-shadow(0 0 8px rgba(222, 117, 82, 0.45)); }
+}
+
+/* Interactive mood selector: scale selected, fade others */
+.mood-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mood-btn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 220ms ease, 
+              border-color 220ms ease, 
+              background-color 220ms ease;
+}
+
+.mood-btn.selected {
+  transform: scale(1.18);
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(184, 80, 48, 0.18);
+  z-index: 2;
+}
+
+.mood-picker-group.has-selection .mood-btn:not(.selected) {
+  opacity: 0.45;
+  transform: scale(0.92);
+}
+
+/* ----------------------------------------------------
+   16. NAVIGATION & NOTEBOOK PAGE TURNING
+   ---------------------------------------------------- */
+/* Notebook corner peel for desktop arrows */
+.nav-arrow-peel {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-arrow-peel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 0 0;
+  border-color: transparent transparent var(--accent) transparent;
+  transition: all 200ms ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-arrow-peel:hover::after {
+    border-width: 0 10px 10px 0;
+    box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.notebook-turn-left {
+  animation: pageTurnLeft 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.notebook-turn-right {
+  animation: pageTurnRight 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pageTurnLeft {
+  0% { opacity: 0; transform: translateX(25px) scale(0.985); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes pageTurnRight {
+  0% { opacity: 0; transform: translateX(-25px) scale(0.985); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Mobile bottom nav bounce & sliding indicator */
+.mobile-nav-item.active .m-nav-icon {
+  animation: tabBounce 320ms cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  color: var(--accent);
+}
+
+@keyframes tabBounce {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-4px) scale(1.18); }
+  70% { transform: translateY(1px) scale(0.96); }
+  100% { transform: translateY(0) scale(1.08); }
+}
+
+.mobile-bottom-nav {
+  position: relative;
+}
+
+.mobile-nav-indicator {
+  position: absolute;
+  top: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 0 0 3px 3px;
+  transition: left 300ms cubic-bezier(0.16, 1, 0.3, 1), width 300ms ease;
+  pointer-events: none;
+}
+
+/* Plus button rotates into cross while sheet rises with soft spring */
+.mobile-fab {
+  transition: transform 320ms cubic-bezier(0.34, 1.35, 0.64, 1), 
+              background-color 200ms ease, 
+              box-shadow 200ms ease;
+}
+
+.mobile-fab.fab-active {
+  transform: rotate(45deg) scale(1.05);
+  background: var(--bg-surface-elevated);
+  color: var(--accent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.mobile-bottom-sheet {
+  transition: transform 380ms cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+/* Page cross-fade with small upward slide */
+.view-content {
+  animation: pageFadeSlideUp 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pageFadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ----------------------------------------------------
+   17. CALENDAR & INSIGHTS MOTION
+   ---------------------------------------------------- */
+/* Month grid slide sideways */
+.cal-month-grid.slide-left {
+  animation: gridSlideLeft 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cal-month-grid.slide-right {
+  animation: gridSlideRight 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes gridSlideLeft {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes gridSlideRight {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Day cell grow on press & task fan-out */
+.cal-day-cell:active {
+  transform: scale(1.06) !important;
+}
+
+.fan-out-item {
+  animation: fanOut 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fanOut {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Charts grow from zero to values one bar after another */
+.chart-bar-grow {
+  transform-origin: bottom center;
+  animation: barGrowUp 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes barGrowUp {
+  from {
+    transform: scaleY(0);
+    opacity: 0.3;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* Diagonal heatmap fade-in */
+.diagonal-fade {
+  animation: diagFade 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes diagFade {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ----------------------------------------------------
+   18. FEEDBACK, CLOUD SYNC & SYSTEM STATES
+   ---------------------------------------------------- */
+/* Theme toggle sun turns into moon while colours cross-fade */
+.theme-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-toggle-btn:active .theme-toggle-icon {
+  transform: rotate(180deg) scale(0.88);
+}
+
+html, body, .app-layout, .app-sidebar, .card, .view-content {
+  transition: background-color 350ms ease, color 350ms ease, border-color 350ms ease;
+}
+
+/* Cloud sync spinning icon morphs into a tick */
+.sync-icon.syncing {
+  animation: syncSpin 650ms linear infinite;
+}
+
+@keyframes syncSpin {
+  100% { transform: rotate(360deg); }
+}
+
+.sync-icon.synced {
+  animation: syncSuccessTick 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes syncSuccessTick {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.25); color: #39674E; }
+  100% { transform: scale(1); opacity: 1; color: #39674E; }
+}
+
+/* Loading: shimmering placeholder blocks instead of spinners */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--bg-subtle) 0%, var(--bg-hover) 50%, var(--bg-subtle) 100%);
+  background-size: 200% 100%;
+  animation: shimmerMove 1.6s infinite ease-in-out;
+  border-radius: var(--radius-xs);
+}
+
+@keyframes shimmerMove {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Sign in with Google shrinks to spinner then expands into avatar */
+.google-sign-in-btn {
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.google-sign-in-btn.btn-shrinking {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  overflow: hidden;
+  justify-content: center;
+}
+
+.auth-avatar-expand {
+  animation: avatarExpand 380ms cubic-bezier(0.34, 1.35, 0.64, 1) both;
+}
+
+@keyframes avatarExpand {
+  0% { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ----------------------------------------------------
+   19. SMALL DELIGHTS
+   ---------------------------------------------------- */
+/* Buttons shrink slightly while pressed (:active scale 0.96) */
+.btn:active,
+.icon-btn:active,
+.tab-btn:active,
+.filter-pill:active,
+.chip-task-btn:active,
+.sheet-option-card:active,
+.sheet-menu-item:active,
+.mobile-nav-item:active,
+.mood-btn:active {
+  transform: scale(0.96) !important;
+  transition: transform 100ms ease;
+}
+
+/* Empty states gentle floating illustration */
+.empty-state .empty-icon {
+  animation: gentleFloat 3.4s ease-in-out infinite alternate;
+  display: inline-block;
+}
+
+@keyframes gentleFloat {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1.5deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* Greeting word-by-word fade-in */
+.greeting-word {
+  display: inline-block;
+  opacity: 0;
+  animation: wordFadeIn 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes wordFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pull down to refresh bouncing logo */
+.pull-refresh-indicator {
+  position: absolute;
+  top: -48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-surface-elevated);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: transform 200ms ease, opacity 200ms ease;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+}
+
+.pull-refresh-indicator.refreshing {
+  animation: logoBounce 700ms ease-in-out infinite alternate;
+  opacity: 1;
+}
+
+@keyframes logoBounce {
+  0% { transform: translateX(-50%) translateY(56px) scale(1); }
+  100% { transform: translateX(-50%) translateY(68px) scale(1.15); }
 }
 
 /* ----------------------------------------------------

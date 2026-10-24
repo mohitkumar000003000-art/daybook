@@ -23,6 +23,7 @@ export class PlanView {
     this.onOpenTaskModal = onOpenTaskModal;
     this.onOpenJournalEditor = onOpenJournalEditor;
     this.currentDateStr = getTodayString();
+    this.transitionClass = '';
   }
 
   setDate(dateStr) {
@@ -38,11 +39,18 @@ export class PlanView {
     const dateDisplay = formatDisplayDate(this.currentDateStr, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     const isCurrentDateToday = isToday(this.currentDateStr);
 
-    const prevDateStr = formatISODate(addDays(this.currentDateStr, -1));
-    const nextDateStr = formatISODate(addDays(this.currentDateStr, 1));
+    const totalDayTasks = dayTasks.length;
+    const doneDayTasks = dayTasks.filter(t => t.completed).length;
+    const dayPct = totalDayTasks === 0 ? 0 : Math.round((doneDayTasks / totalDayTasks) * 100);
+    const ringRadius = 14;
+    const ringCircumference = 2 * Math.PI * ringRadius; // ~87.96
+    const ringOffset = ringCircumference * (1 - dayPct / 100);
+
+    const animClass = this.transitionClass;
+    this.transitionClass = '';
 
     this.container.innerHTML = `
-      <div class="view-content plan-view">
+      <div class="view-content plan-view ${animClass}">
         <!-- View Header -->
         <header class="view-header">
           <div class="view-header-title">
@@ -51,16 +59,26 @@ export class PlanView {
             <p class="page-subtext">Structure your day around what truly moves the needle, then close the evening with mindful reflection.</p>
           </div>
 
-          <!-- Date Navigation Bar -->
+          <!-- Date Navigation Bar with Progress Ring and Corner Peel Arrows -->
           <div class="plan-date-navigator">
-            <button class="icon-btn" id="plan-prev-day-btn" title="Previous Day">
+            <button class="icon-btn nav-arrow-peel" id="plan-prev-day-btn" title="Previous Day (Swipe or Click)" aria-label="Previous Day">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
             <div class="plan-date-center">
+              <!-- Animated Progress Ring around Date -->
+              <div class="date-progress-ring" title="${dayPct}% tasks completed on this day" aria-label="${dayPct}% completed">
+                <svg width="36" height="36" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="${ringRadius}" fill="none" stroke="var(--border-subtle)" stroke-width="3" />
+                  <circle cx="18" cy="18" r="${ringRadius}" fill="none" stroke="var(--accent)" stroke-width="3" 
+                          stroke-dasharray="${ringCircumference.toFixed(1)}" stroke-dashoffset="${ringOffset.toFixed(1)}" 
+                          stroke-linecap="round" transform="rotate(-90 18 18)" class="date-progress-circle" />
+                </svg>
+                <span style="position: absolute; font-size: 10px; font-weight: 700; color: var(--accent);">${dayPct}%</span>
+              </div>
               <span class="plan-date-label">${dateDisplay}</span>
               ${isCurrentDateToday ? `<span class="badge-today-pill">Today</span>` : ''}
             </div>
-            <button class="icon-btn" id="plan-next-day-btn" title="Next Day">
+            <button class="icon-btn nav-arrow-peel" id="plan-next-day-btn" title="Next Day (Swipe or Click)" aria-label="Next Day">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
             ${!isCurrentDateToday ? `<button class="btn btn-sm btn-secondary" id="plan-jump-today">Back to Today</button>` : ''}
@@ -120,7 +138,7 @@ export class PlanView {
 
           <!-- Right Column -->
           <div class="plan-column">
-            <!-- 4. Schedule & Time Blocks Card -->
+            <!-- 4. Schedule & Time Blocks Card with Drawing Timeline and Now Marker -->
             <div class="card plan-card">
               <div class="card-header">
                 <div class="card-title-group">
@@ -130,8 +148,11 @@ export class PlanView {
                 <button class="btn btn-sm btn-secondary" id="add-time-block-btn">+ Add Block</button>
               </div>
 
-              <div class="time-blocks-container">
-                ${this.renderTimeBlocksList(plan.timeBlocks)}
+              <div class="timeline-wrapper">
+                <div class="timeline-spine-line" title="Timeline"></div>
+                <div class="time-blocks-container">
+                  ${this.renderTimeBlocksList(plan.timeBlocks, isCurrentDateToday)}
+                </div>
               </div>
             </div>
           </div>
@@ -152,18 +173,36 @@ export class PlanView {
       `;
     }
 
-    return topThree.map((mit, idx) => `
-      <div class="plan-mit-row ${mit.completed ? 'completed' : ''}">
-        <span class="mit-rank">#${idx + 1}</span>
-        <button class="task-checkbox-btn ${mit.completed ? 'checked' : ''}" data-action="toggle-plan-mit" data-idx="${idx}" aria-label="Toggle MIT">
-          ${mit.completed ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
-        </button>
-        <span class="mit-label">${escapeHtml(mit.text)}</span>
-      </div>
-    `).join('');
+    const circleRadius = 9;
+    const circleCircumference = 2 * Math.PI * circleRadius; // ~56.55
+
+    return topThree.map((mit, idx) => {
+      const isDone = Boolean(mit.completed);
+      const sweepOffset = isDone ? 0 : circleCircumference;
+
+      return `
+        <div class="plan-mit-row ${isDone ? 'completed' : ''}">
+          <span class="mit-rank">#${idx + 1}</span>
+          <button class="task-checkbox-btn mit-checkbox-sweep ${isDone ? 'checked' : ''}" 
+                  data-action="toggle-plan-mit" 
+                  data-idx="${idx}" 
+                  aria-label="Toggle MIT ${idx + 1}"
+                  style="border: none; background: transparent; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+            <svg class="mit-sweep-svg" width="24" height="24" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="${circleRadius}" fill="none" stroke="var(--border)" stroke-width="2.2" />
+              <circle cx="12" cy="12" r="${circleRadius}" fill="none" stroke="var(--accent)" stroke-width="2.5" 
+                      stroke-dasharray="${circleCircumference.toFixed(1)}" stroke-dashoffset="${sweepOffset.toFixed(1)}" 
+                      stroke-linecap="round" transform="rotate(-90 12 12)" class="mit-sweep-circle" />
+              ${isDone ? `<polyline points="16 9 11 14 8 11" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+            </svg>
+          </button>
+          <span class="mit-label">${escapeHtml(mit.text)}</span>
+        </div>
+      `;
+    }).join('');
   }
 
-  renderTimeBlocksList(blocks) {
+  renderTimeBlocksList(blocks, isToday) {
     if (!blocks || blocks.length === 0) {
       return `
         <div class="empty-hint-card">
@@ -176,8 +215,29 @@ export class PlanView {
     // Sort by startTime
     const sorted = [...blocks].sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-    return sorted.map((b, idx) => `
-      <div class="time-block-row" data-block-id="${b.id}">
+    // Calculate now marker position if viewing today
+    let nowMarkerHtml = '';
+    if (isToday) {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const startDayMinutes = 8 * 60; // 8:00 AM
+      const endDayMinutes = 20 * 60;  // 8:00 PM
+      const totalSpan = endDayMinutes - startDayMinutes;
+      const clamped = Math.max(0, Math.min(1, (currentMinutes - startDayMinutes) / totalSpan));
+      const topPct = (clamped * 100).toFixed(1);
+      const currentTimeLabel = formatTime(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+
+      nowMarkerHtml = `
+        <div class="timeline-now-marker" style="top: ${topPct}%;" title="Current Time: ${currentTimeLabel}">
+          <span class="now-dot"></span>
+          <span class="now-line"></span>
+          <span class="now-label">NOW ${currentTimeLabel}</span>
+        </div>
+      `;
+    }
+
+    const blocksHtml = sorted.map((b, idx) => `
+      <div class="time-block-row" data-block-id="${b.id}" style="margin-left: 28px;">
         <div class="tb-time-range">${formatTime(b.startTime)} – ${formatTime(b.endTime)}</div>
         <div class="tb-info">
           <span class="tb-title">${escapeHtml(b.title)}</span>
@@ -188,26 +248,63 @@ export class PlanView {
         </button>
       </div>
     `).join('');
+
+    return `
+      ${nowMarkerHtml}
+      ${blocksHtml}
+    `;
   }
 
   bindEvents() {
-    // Prev / Next day navigation
+    // Prev / Next day navigation with notebook page turning animation
     this.container.querySelector('#plan-prev-day-btn')?.addEventListener('click', () => {
       this.currentDateStr = formatISODate(addDays(this.currentDateStr, -1));
+      this.transitionClass = 'notebook-turn-right';
       this.render();
     });
 
     this.container.querySelector('#plan-next-day-btn')?.addEventListener('click', () => {
       this.currentDateStr = formatISODate(addDays(this.currentDateStr, 1));
+      this.transitionClass = 'notebook-turn-left';
       this.render();
     });
 
     this.container.querySelector('#plan-jump-today')?.addEventListener('click', () => {
       this.currentDateStr = getTodayString();
+      this.transitionClass = 'notebook-turn-left';
       this.render();
     });
 
-    // Toggle MIT with confetti
+    // Mobile touch swipe between days (swipe right -> prev, swipe left -> next)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const planViewEl = this.container.querySelector('.plan-view');
+    planViewEl?.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    planViewEl?.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].screenX;
+      const touchEndY = e.changedTouches[0].screenY;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      if (Math.abs(diffX) > 48 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+        if (diffX > 0) {
+          // Swiped right -> previous day
+          this.currentDateStr = formatISODate(addDays(this.currentDateStr, -1));
+          this.transitionClass = 'notebook-turn-right';
+          this.render();
+        } else {
+          // Swiped left -> next day
+          this.currentDateStr = formatISODate(addDays(this.currentDateStr, 1));
+          this.transitionClass = 'notebook-turn-left';
+          this.render();
+        }
+      }
+    }, { passive: true });
+
+    // Toggle MIT with circular sweep and confetti burst when all 3 completed
     this.container.querySelectorAll('[data-action="toggle-plan-mit"]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const idx = parseInt(btn.getAttribute('data-idx'), 10);
@@ -218,10 +315,14 @@ export class PlanView {
             store.toggleTask(plan.topThree[idx].taskId);
           }
           store.saveDailyPlan(this.currentDateStr, { topThree: plan.topThree });
+
+          const completedCount = plan.topThree.filter(m => m.completed).length;
           if (plan.topThree[idx].completed) {
-            const stats = store.getTaskStats(this.currentDateStr);
-            if (stats.total > 0 && stats.remaining === 0) {
-              firePaperConfetti(e.clientX, e.clientY, 25);
+            if (completedCount === 3) {
+              firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight / 3, 35);
+              toast.success('All 3 core priorities achieved! Celebration burst! 🎉');
+            } else {
+              toast.success(`Priority #${idx + 1} completed! (${completedCount}/3 done)`);
             }
           }
           this.render();

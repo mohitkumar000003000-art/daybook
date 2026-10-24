@@ -162,6 +162,19 @@ export class ProgressView {
               ${renderWritingActivityTrend(last14DaysData)}
             </div>
           </div>
+
+          <!-- 3. 4-Week Activity Heatmap (Squares fade in diagonally) -->
+          <div class="card chart-card" style="grid-column: 1 / -1;">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-eyebrow">Consistency Flow</span>
+                <h2 class="card-title">28-Day Habit & Reflection Heatmap</h2>
+              </div>
+            </div>
+            <div class="chart-embed">
+              ${this.renderActivityHeatmap()}
+            </div>
+          </div>
         </div>
 
         <!-- 2 Column Lower Section: Category Distribution & Completed Milestones History -->
@@ -224,6 +237,58 @@ export class ProgressView {
     // Attach 3D tilt and click ripples
     attach3DTilt(this.container.querySelectorAll('.stat-card, .chart-card, .history-item'));
     attachButtonRipples(this.container);
+  }
+
+  renderActivityHeatmap() {
+    const today = new Date();
+    const days = [];
+    for (let i = 27; i >= 0; i--) {
+      const d = addDays(today, -i);
+      const dStr = formatISODate(d);
+      const tasks = store.getTasksForDate(dStr);
+      const entries = store.getJournalEntriesForDate(dStr);
+      const doneTasks = tasks.filter(t => t.completed).length;
+      const count = doneTasks + entries.length;
+      let level = 0;
+      if (count >= 5) level = 4;
+      else if (count >= 3) level = 3;
+      else if (count >= 2) level = 2;
+      else if (count >= 1) level = 1;
+
+      days.push({
+        dateStr: dStr,
+        dayNum: d.getDate(),
+        level,
+        count
+      });
+    }
+
+    const dayHeaders = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const headersHtml = dayHeaders.map(h => `<span>${h}</span>`).join('');
+
+    const squaresHtml = days.map((day, idx) => {
+      const col = idx % 7;
+      const row = Math.floor(idx / 7);
+      const delay = (col + row) * 25;
+
+      return `
+        <div class="heatmap-square heatmap-level-${day.level} diagonal-fade" 
+             style="animation-delay: ${delay}ms;" 
+             title="${day.dateStr}: ${day.count} activities (${day.count > 0 ? 'completed' : 'none'})"
+             tabindex="0"
+             role="button"
+             aria-label="${day.dateStr}">
+          ${day.dayNum}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="heatmap-grid-wrap">
+        <div class="heatmap-days-header">${headersHtml}</div>
+        <div class="heatmap-grid">${squaresHtml}</div>
+      </div>
+    `;
   }
 }
 

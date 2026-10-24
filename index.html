@@ -150,7 +150,11 @@
     </aside>
 
     <!-- Main Dynamic Content Region -->
-    <main class="app-main-content">
+    <main class="app-main-content" style="position: relative;">
+      <!-- Pull-to-refresh bouncing indicator for mobile -->
+      <div class="pull-refresh-indicator" id="pull-refresh-indicator" aria-hidden="true">
+        <span class="pull-logo-icon">D</span>
+      </div>
       <div id="main-view-container"></div>
     </main>
   </div>
@@ -165,6 +169,9 @@
 
   <!-- Mobile Bottom Navigation (Visible on phones/small screens) -->
   <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <!-- Sliding Tab Indicator -->
+    <div class="mobile-nav-indicator" id="mobile-nav-indicator"></div>
+
     <button class="mobile-nav-item active" data-nav="dashboard" aria-label="Today">
       <span class="m-nav-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -282,8 +289,12 @@
         </button>
 
         <button class="sheet-pill-btn" id="mobile-account-toggle">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span>Cloud Sync</span>
+          <span class="sync-icon-container" id="mobile-sync-icon-wrap" style="display:inline-flex; align-items:center;">
+            <svg class="sync-icon" id="mobile-sync-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+          </span>
+          <span id="mobile-sync-text">Cloud Sync</span>
         </button>
       </div>
     </div>

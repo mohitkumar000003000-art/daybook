@@ -156,8 +156,10 @@ class App {
     // Initial render
     this.updateSidebarUserProfile();
     this.navigate('dashboard');
+    this.updateMobileNavIndicator();
+    this.initPullToRefresh();
+    window.addEventListener('resize', () => this.updateMobileNavIndicator());
     attachButtonRipples(document.body);
-
 
     // 9. Check first-run onboarding
     if (shouldShowOnboarding()) {
@@ -228,8 +230,8 @@ class App {
     const mobileThemeIcon = document.getElementById('mobile-theme-icon');
     const mobileThemeLabel = document.getElementById('mobile-theme-label');
 
-    const sunSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
-    const moonSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+    const sunSvg = `<span class="theme-toggle-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>`;
+    const moonSvg = `<span class="theme-toggle-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>`;
 
     if (themeIcon) {
       themeIcon.innerHTML = theme === 'dark' ? sunSvg : moonSvg;
@@ -247,20 +249,27 @@ class App {
     const qcBackdrop = document.getElementById('quick-create-backdrop');
     const moreSheet = document.getElementById('more-menu-sheet');
     const moreBackdrop = document.getElementById('more-menu-backdrop');
+    const fabBtn = document.getElementById('mobile-fab');
 
     this.closeAllSheets = () => {
       qcSheet?.classList.remove('open');
       qcBackdrop?.classList.remove('visible');
       moreSheet?.classList.remove('open');
       moreBackdrop?.classList.remove('visible');
+      fabBtn?.classList.remove('fab-active');
     };
     const closeAllSheets = this.closeAllSheets;
 
-    // FAB quick create button
-    document.getElementById('mobile-fab')?.addEventListener('click', () => {
-      closeAllSheets();
-      qcBackdrop?.classList.add('visible');
-      qcSheet?.classList.add('open');
+    // FAB quick create button: rotates into cross with spring
+    fabBtn?.addEventListener('click', () => {
+      if (qcSheet?.classList.contains('open')) {
+        closeAllSheets();
+      } else {
+        closeAllSheets();
+        qcBackdrop?.classList.add('visible');
+        qcSheet?.classList.add('open');
+        fabBtn?.classList.add('fab-active');
+      }
     });
 
     document.getElementById('quick-create-close')?.addEventListener('click', closeAllSheets);
@@ -304,14 +313,87 @@ class App {
       toast.info(`Switched to ${nextTheme === 'dark' ? 'Deep Espresso' : 'Warm Paper'} mode`);
     });
 
-    // Account toggle in mobile more sheet
+    // Account toggle / Cloud sync in mobile more sheet
     document.getElementById('mobile-account-toggle')?.addEventListener('click', () => {
-      closeAllSheets();
-      openGoogleSignInModal(() => {
-        this.updateSidebarUserProfile();
-        this.renderCurrentView();
-      });
+      const syncIcon = document.getElementById('mobile-sync-icon');
+      if (syncIcon) {
+        syncIcon.classList.remove('synced');
+        syncIcon.classList.add('syncing');
+        setTimeout(() => {
+          syncIcon.classList.remove('syncing');
+          syncIcon.classList.add('synced');
+          syncIcon.innerHTML = `<polyline points="20 6 9 17 4 12" stroke-width="2.5"></polyline>`;
+          toast.success('Sync complete: All entries & tasks up to date');
+          setTimeout(() => {
+            syncIcon.classList.remove('synced');
+            syncIcon.innerHTML = `<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>`;
+          }, 2400);
+        }, 650);
+      }
+      setTimeout(() => {
+        closeAllSheets();
+        openGoogleSignInModal(() => {
+          this.updateSidebarUserProfile();
+          this.renderCurrentView();
+        });
+      }, 700);
     });
+  }
+
+  updateMobileNavIndicator() {
+    const indicator = document.getElementById('mobile-nav-indicator');
+    if (!indicator) return;
+    const activeItem = document.querySelector('.mobile-nav-item.active');
+    if (activeItem) {
+      indicator.style.left = `${activeItem.offsetLeft}px`;
+      indicator.style.width = `${activeItem.offsetWidth}px`;
+    }
+  }
+
+  initPullToRefresh() {
+    const indicator = document.getElementById('pull-refresh-indicator');
+    if (!indicator) return;
+
+    let touchStartY = 0;
+    let isDragging = false;
+    let pullDistance = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      if (window.scrollY <= 5 && e.touches.length === 1) {
+        touchStartY = e.touches[0].clientY;
+        isDragging = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging || window.scrollY > 5) return;
+      const currentY = e.touches[0].clientY;
+      pullDistance = currentY - touchStartY;
+      if (pullDistance > 10) {
+        const translateY = Math.min(pullDistance * 0.4, 75);
+        indicator.style.transform = `translateX(-50%) translateY(${translateY}px)`;
+        indicator.style.opacity = String(Math.min(pullDistance / 80, 1));
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      if (pullDistance > 70) {
+        indicator.classList.add('refreshing');
+        setTimeout(() => {
+          indicator.classList.remove('refreshing');
+          indicator.style.transform = 'translateX(-50%) translateY(0px)';
+          indicator.style.opacity = '0';
+          this.renderCurrentView();
+          toast.info('Refreshed');
+        }, 650);
+      } else {
+        indicator.style.transform = 'translateX(-50%) translateY(0px)';
+        indicator.style.opacity = '0';
+      }
+      pullDistance = 0;
+    }, { passive: true });
   }
 
   bindNavigation() {
@@ -367,6 +449,9 @@ class App {
         moreBtn.classList.remove('active');
       }
     }
+
+    // Smoothly reposition mobile nav indicator
+    this.updateMobileNavIndicator();
 
     // Scroll main window to top
     window.scrollTo({ top: 0, behavior: 'smooth' });

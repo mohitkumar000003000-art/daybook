@@ -188,19 +188,39 @@ function renderSignInModal(onSuccess = null) {
         }
       };
 
-      // "Sign in with Google" button
+      // "Sign in with Google" button: shrinks to a spinner, then expands into user avatar
       const googleBtn = overlay.querySelector('#modal-google-signin-btn');
       googleBtn?.addEventListener('click', async () => {
         if (googleBtn.disabled) return;
         googleBtn.disabled = true;
-        googleBtn.style.opacity = '0.7';
+
+        // Animate button shrinking to a compact spinner
+        googleBtn.classList.add('btn-shrinking');
+        googleBtn.innerHTML = `
+          <svg class="sync-icon syncing" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.8">
+            <circle cx="12" cy="12" r="9" stroke-dasharray="38" stroke-dashoffset="12" stroke-linecap="round"/>
+          </svg>
+        `;
+
+        const expandToAvatarAndComplete = (userName, userEmail, userProvider, userAvatar = '', userUid = '') => {
+          const initial = (userName || userEmail || 'D').charAt(0).toUpperCase();
+          googleBtn.classList.remove('btn-shrinking');
+          googleBtn.innerHTML = `
+            <div class="auth-avatar-expand" style="width:40px; height:40px; border-radius:50%; background:var(--accent); color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; box-shadow:0 4px 14px rgba(184,80,48,0.35);">
+              ${escapeHtml(initial)}
+            </div>
+          `;
+          setTimeout(() => {
+            handleLogin(userName, userEmail, userProvider, userAvatar, userUid);
+          }, 450);
+        };
 
         try {
           if (isFirebaseConfigured()) {
-            toast.info('Opening Google Sign-In...');
+            toast.info('Connecting with Google...');
             const result = await authenticateWithGoogle();
             if (result.success && result.user) {
-              handleLogin(result.user.name, result.user.email, 'google', result.user.avatarUrl, result.user.uid);
+              expandToAvatarAndComplete(result.user.name, result.user.email, 'google', result.user.avatarUrl, result.user.uid);
               return;
             } else if (result.redirected) {
               toast.info('Redirecting to Google Sign-In...');
@@ -213,13 +233,24 @@ function renderSignInModal(onSuccess = null) {
             }
           } else {
             // Firebase not yet configured with user's keys - offer mock sign-in with clear notification
-            toast.info('Firebase keys not configured yet. Using local profile simulation.');
+            toast.info('Firebase keys not configured yet. Simulating authentic Google sign-in.');
             const user = store.getUserSettings();
-            handleLogin(user.name || 'Alex Henderson', 'alex.henderson@gmail.com', 'google');
+            setTimeout(() => {
+              expandToAvatarAndComplete(user.name || 'Alex Henderson', 'alex.henderson@gmail.com', 'google');
+            }, 600);
+            return;
           }
         } finally {
-          googleBtn.disabled = false;
-          googleBtn.style.opacity = '1';
+          setTimeout(() => {
+            if (googleBtn && !googleBtn.querySelector('.auth-avatar-expand')) {
+              googleBtn.disabled = false;
+              googleBtn.classList.remove('btn-shrinking');
+              googleBtn.innerHTML = `
+                ${GOOGLE_LOGO_SVG}
+                <span>Sign in with Google</span>
+              `;
+            }
+          }, 700);
         }
       });
 

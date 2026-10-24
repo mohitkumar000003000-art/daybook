@@ -35,6 +35,9 @@ export class DashboardView {
     const isDemo = user.isDemoLoaded === true;
     const displayName = user.name ? `, ${escapeHtml(user.name)}` : '';
 
+    const greetingWords = greetingDetails.greeting.split(' ');
+    const greetingWordsHtml = greetingWords.map((word, i) => `<span class="greeting-word" style="animation-delay: ${i * 70}ms">${escapeHtml(word)}</span>`).join(' ');
+
     this.container.innerHTML = `
       <div class="view-content dashboard-view">
         ${isDemo ? `
@@ -52,12 +55,20 @@ export class DashboardView {
           <div class="header-intro">
             <div class="header-datetime-row">
               <span class="header-date-badge" id="dash-live-date">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <!-- Circular Progress Ring around Date -->
+                <div class="date-progress-ring" title="${taskStats.percentage}% tasks completed today" aria-label="${taskStats.percentage}% completed" style="margin-right: 6px;">
+                  <svg width="26" height="26" viewBox="0 0 28 28">
+                    <circle cx="14" cy="14" r="10" fill="none" stroke="var(--border-subtle)" stroke-width="2.5" />
+                    <circle cx="14" cy="14" r="10" fill="none" stroke="var(--accent)" stroke-width="2.5" 
+                            stroke-dasharray="62.8" stroke-dashoffset="${(62.8 * (1 - taskStats.percentage / 100)).toFixed(1)}" 
+                            stroke-linecap="round" transform="rotate(-90 14 14)" class="date-progress-circle" />
+                  </svg>
+                </div>
                 <span class="live-date-val">${formattedDate}</span>
               </span>
             </div>
             <h1 class="header-greeting" id="dash-live-greeting">
-              <span class="greeting-text">${greetingDetails.greeting}</span>${displayName}
+              <span class="greeting-text">${greetingWordsHtml}</span>${displayName}
             </h1>
             <p class="header-subtext" id="dash-live-subtext">${greetingDetails.message}</p>
           </div>
@@ -304,17 +315,35 @@ export class DashboardView {
       `;
     }
 
-    return topThree.map((mit, idx) => `
-      <div class="mit-item ${mit.completed ? 'completed' : ''}" data-mit-id="${mit.id}">
-        <div class="mit-number">0${idx + 1}</div>
-        <div class="mit-content">
-          <span class="mit-text">${escapeHtml(mit.text)}</span>
+    const circleRadius = 9;
+    const circleCircumference = 2 * Math.PI * circleRadius; // ~56.55
+
+    return topThree.map((mit, idx) => {
+      const isDone = Boolean(mit.completed);
+      const sweepOffset = isDone ? 0 : circleCircumference;
+
+      return `
+        <div class="mit-item ${isDone ? 'completed' : ''}" data-mit-id="${mit.id}">
+          <div class="mit-number">0${idx + 1}</div>
+          <div class="mit-content">
+            <span class="mit-text">${escapeHtml(mit.text)}</span>
+          </div>
+          <button class="task-checkbox-btn mit-checkbox-sweep ${isDone ? 'checked' : ''}" 
+                  data-action="toggle-mit" 
+                  data-idx="${idx}" 
+                  aria-label="Toggle MIT completion"
+                  style="border: none; background: transparent; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+            <svg class="mit-sweep-svg" width="24" height="24" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="${circleRadius}" fill="none" stroke="var(--border)" stroke-width="2.2" />
+              <circle cx="12" cy="12" r="${circleRadius}" fill="none" stroke="var(--accent)" stroke-width="2.5" 
+                      stroke-dasharray="${circleCircumference.toFixed(1)}" stroke-dashoffset="${sweepOffset.toFixed(1)}" 
+                      stroke-linecap="round" transform="rotate(-90 12 12)" class="mit-sweep-circle" />
+              ${isDone ? `<polyline points="16 9 11 14 8 11" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+            </svg>
+          </button>
         </div>
-        <button class="task-checkbox-btn ${mit.completed ? 'checked' : ''}" data-action="toggle-mit" data-idx="${idx}" aria-label="Toggle MIT completion">
-          ${mit.completed ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
-        </button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   renderTodayTasks(tasks) {
@@ -381,13 +410,38 @@ export class DashboardView {
       return `<p class="empty-hint">No scheduled time blocks set for today yet.</p>`;
     }
 
-    return blocks.map(block => `
-      <div class="time-block-pill">
-        <span class="time-block-time">${formatTime(block.startTime)} – ${formatTime(block.endTime)}</span>
-        <span class="time-block-title">${escapeHtml(block.title)}</span>
-        <span class="category-pill-label" style="font-size: 11px;">${capitalize(block.category || 'Focus')}</span>
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const startDayMinutes = 8 * 60;
+    const endDayMinutes = 20 * 60;
+    const totalSpan = endDayMinutes - startDayMinutes;
+    const clamped = Math.max(0, Math.min(1, (currentMinutes - startDayMinutes) / totalSpan));
+    const topPct = (clamped * 100).toFixed(1);
+    const currentTimeLabel = formatTime(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+
+    const nowMarkerHtml = `
+      <div class="timeline-now-marker" style="top: ${topPct}%;" title="Current Time: ${currentTimeLabel}">
+        <span class="now-dot"></span>
+        <span class="now-line"></span>
+        <span class="now-label">NOW ${currentTimeLabel}</span>
       </div>
-    `).join('');
+    `;
+
+    return `
+      <div class="timeline-wrapper">
+        <div class="timeline-spine-line" title="Timeline"></div>
+        ${nowMarkerHtml}
+        <div class="time-blocks-container">
+          ${blocks.map(block => `
+            <div class="time-block-pill" style="margin-left: 26px;">
+              <span class="time-block-time">${formatTime(block.startTime)} – ${formatTime(block.endTime)}</span>
+              <span class="time-block-title">${escapeHtml(block.title)}</span>
+              <span class="category-pill-label" style="font-size: 11px;">${capitalize(block.category || 'Focus')}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
   }
 
   bindEvents() {
@@ -430,22 +484,44 @@ export class DashboardView {
       setTimeout(() => refreshBtn.classList.remove('spinning'), 550);
     });
 
-    // Task checkbox toggle with celebration only when all daily tasks are completed
+    // Task checkbox toggle with sequence: pop, strike-through drawn left to right, then row slides away
     this.container.querySelectorAll('[data-action="toggle-task"]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const id = btn.getAttribute('data-id');
-        const updated = store.toggleTask(id);
-        if (updated && updated.completed) {
-          const stats = store.getTaskStats(getTodayString());
-          if (stats.total > 0 && stats.remaining === 0) {
-            firePaperConfetti(e.clientX, e.clientY, 25);
+        const row = btn.closest('.task-row');
+        const task = store.getTaskById(id);
+        const willComplete = task && !task.completed;
+
+        if (willComplete && row) {
+          btn.classList.add('checked');
+          if (!btn.querySelector('svg')) {
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
           }
+          row.classList.add('completed');
+          row.classList.add('just-completed');
+
+          setTimeout(() => {
+            row.classList.add('slide-away');
+            setTimeout(() => {
+              store.toggleTask(id);
+              const stats = store.getTaskStats(getTodayString());
+              if (stats.total > 0 && stats.remaining === 0) {
+                firePaperConfetti(e.clientX, e.clientY, 30);
+              }
+              toast.success('Task completed! Keep up the momentum.');
+              this.render();
+            }, 340);
+          }, 260);
+          return;
         }
+
+        store.toggleTask(id);
+        this.render();
       });
     });
 
-    // Top 3 MIT toggle with celebration only when all daily tasks are completed
+    // Top 3 MIT toggle with circular sweep and confetti burst when all 3 completed
     this.container.querySelectorAll('[data-action="toggle-mit"]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -458,12 +534,16 @@ export class DashboardView {
             store.toggleTask(plan.topThree[idx].taskId);
           }
           store.saveDailyPlan(todayStr, { topThree: plan.topThree });
+          const completedCount = plan.topThree.filter(m => m.completed).length;
           if (plan.topThree[idx].completed) {
-            const stats = store.getTaskStats(todayStr);
-            if (stats.total > 0 && stats.remaining === 0) {
-              firePaperConfetti(e.clientX, e.clientY, 25);
+            if (completedCount === 3) {
+              firePaperConfetti(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight / 3, 35);
+              toast.success('All 3 core priorities achieved! Celebration burst! 🎉');
+            } else {
+              toast.success(`Priority #${idx + 1} completed! (${completedCount}/3 done)`);
             }
           }
+          this.render();
         }
       });
     });
